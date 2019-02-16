@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+import './App.scss';
+
+
 const PlaceRow = ({ place, visited }) =>
   <li className="place">
     <div >
