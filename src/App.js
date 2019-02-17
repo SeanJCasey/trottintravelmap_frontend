@@ -14,14 +14,15 @@ const PATH_PLACEMAPS = '/placemaps';
 const URL_PLACES = `${PATH_BASE}${PATH_PLACES}`;
 const URL_PLACEMAPS = `${PATH_BASE}${PATH_PLACEMAPS}`;
 
-const PlaceRow = ({ place, visited }) =>
+const PlaceRow = ({ place, visited, onChange }) =>
   <li className="place">
     <div >
       <label>
         <input name="places"
                type="checkbox"
-               value={ place.id }
-               checked={ visited ? 'checked' : '' }
+               value={place.id}
+               checked={visited ? 'checked' : ''}
+               onChange={onChange}
         />
         {place.name}
       </label>
@@ -29,7 +30,7 @@ const PlaceRow = ({ place, visited }) =>
   </li>
 
 
-const PlacesList = ({ placesByRegion, visitedPlaces }) =>
+const PlacesList = ({ placesByRegion, visitedPlaces, onPlaceRowChange }) =>
   <div className="place-list">
 
     {Object.keys(placesByRegion).map((region, i) =>
@@ -42,6 +43,7 @@ const PlacesList = ({ placesByRegion, visitedPlaces }) =>
             <PlaceRow place={place}
                       visited={visitedPlaces.includes(place.id) ? true : false}
                       key={place.id}
+                      onChange={onPlaceRowChange}
             />
           )}
         </ul>
@@ -84,7 +86,7 @@ const RegionsFilter = ({ placesByRegion, visitedPlaces }) =>
   </div>
 
 
-const FilterablePlaces = ({ placesByRegion, visitedPlaces }) =>
+const FilterablePlaces = ({ placesByRegion, visitedPlaces, onPlaceRowChange }) =>
   <div className="filterable-places container">
     <div className="row">
       <div className="col-sm-5 col-md-4">
@@ -98,6 +100,7 @@ const FilterablePlaces = ({ placesByRegion, visitedPlaces }) =>
           <PlacesList
             placesByRegion={placesByRegion}
             visitedPlaces={visitedPlaces}
+            onPlaceRowChange={onPlaceRowChange}
           />
         </form>
       </div>
@@ -171,6 +174,7 @@ class EditablePlacesVisitedMap extends Component {
     };
 
     // this.fetchAllPlaces = this.fetchAllPlaces.bind(this);
+    this.handlePlaceRowChange = this.handlePlaceRowChange.bind(this);
   }
 
   calculateVisitedStats(placesVisted) {
@@ -180,9 +184,8 @@ class EditablePlacesVisitedMap extends Component {
     const visitedContinentIdSet = new Set();
     const visitedRegionSet = new Set();
     stats['areaVisited'] = 0;
-    for (const placeId of placesVisted) {
-      const place = this.props.places.find(place => place.id === placeId);
-
+    for (const placeID of placesVisted) {
+      const place = this.props.places.find(place => place.id === placeID);
       // If visitedCountry hasn't been added, add its area to the tally
       if (!visitedCountryIdSet.has(place.country.id)) {
         stats['areaVisited'] += place.country.area;
@@ -201,6 +204,24 @@ class EditablePlacesVisitedMap extends Component {
     return stats;
   }
 
+  handlePlaceRowChange(event) {
+    const placeID = Number(event.target.value);
+    let placesVisited = this.state.placemap.placesVisited.slice();
+
+    if (placesVisited.includes(placeID)) {
+      placesVisited = placesVisited.filter(item => item !== placeID);
+    }
+    else {
+      placesVisited.push(placeID);
+    }
+
+    this.setState({
+      placemap: {
+        placesVisited: placesVisited
+      }
+    })
+  }
+
   render() {
     const { placesVisited } = this.state.placemap;
     const visitedStats = this.calculateVisitedStats(placesVisited);
@@ -216,6 +237,7 @@ class EditablePlacesVisitedMap extends Component {
         <StatBlocksRow stats={stats} />
         <FilterablePlaces placesByRegion={this.props.placesByRegion}
                           visitedPlaces={placesVisited}
+                          onPlaceRowChange={(e) => this.handlePlaceRowChange(e)}
         />
       </div>
     );
