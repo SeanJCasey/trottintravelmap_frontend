@@ -271,7 +271,8 @@ class App extends Component {
       .catch(error => this.setState({ error }));
   }
 
-  createPlacesByRegionObj(places) {
+  createOrderedPlacesByRegionObj(places) {
+    // Create unordered places by region obj
     let placesByRegion = {};
     for (const place of places) {
       if (!(place.region in placesByRegion)) {
@@ -279,7 +280,15 @@ class App extends Component {
       }
       placesByRegion[place.region].push(place);
     }
-    return placesByRegion;
+
+    // Order regions and places alphabetically
+    let orderedPlacesByRegion = {};
+    Object.keys(placesByRegion).sort()
+      .forEach(key => orderedPlacesByRegion[key] = placesByRegion[key].sort(
+        (a, b) => a.name.localeCompare(b.name))
+      );
+
+    return orderedPlacesByRegion;
   }
 
   componentDidMount() {
@@ -291,7 +300,7 @@ class App extends Component {
 
     // Create an object with places grouped by region for ease later
     // Organize places by region here so only do it once
-    const placesByRegion = this.createPlacesByRegionObj(places);
+    const placesByRegion = this.createOrderedPlacesByRegionObj(places);
 
     return (
       <EditablePlacesVisitedMap
