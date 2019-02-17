@@ -1,12 +1,59 @@
+h1, h2, h3, h4 {
+  font-family: $headings-font-family;
+}
+
+body {
+  font-size: 14px;
+}
+
 .traveler-map {
+  .stats {
+    margin-bottom: 30px;
+    margin-top: 1em;
+    text-align: center;
+    .stat-wrapper {
+      padding: 25px;
+      background-color: #d9edf7;
+
+      .stat-title {
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: 500;
+      }
+      .CircularProgressbar {
+        max-width: 150px;
+        .CircularProgressbar-path {
+          stroke: $primary;
+        }
+        .CircularProgressbar-trail {
+          stroke: $white;
+        }
+        .CircularProgressbar-text {
+          fill: $primary;
+          font-weight: 600;
+          font-size: 24px;
+        }
+      }
+      .stat-text {
+        margin-top: 10px;
+      }
+      .substat-text {
+        font-style: italic;
+        margin: 1em 0;
+        color: $gray-600;
+      }
+    }
+  }
   .filterable-places {
     .region-list {
       .nav {
         a {
           background-color: $gray-100;
+          font-weight: 500;
           .badge {
-            margin-top: 3px;
+            margin-top: 1px;
             color: $white;
+            font-size: 12px;
           }
           &.active {
             background-color: $primary;

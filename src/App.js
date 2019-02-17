@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import CircularProgressbar from 'react-circular-progressbar';
 
+import 'react-circular-progressbar/dist/styles.css';
 import './App.scss';
 
 
@@ -96,10 +98,13 @@ const FilterablePlaces = ({ placesByRegion, visitedPlaces }) =>
 
 const StatBlock = ({ title, data, dataMax, statText, substatText }) =>
   <div className="stat-wrapper">
-    <h4>{title}</h4>
-    <div className="dial-wrapper">
-      <input type="text" data-width="150" data-height="150" data-bgcolor="#fff" value={data} data-readonly="true" data-min="0" data-max={dataMax} className="dial" />
-    </div>
+    <h4 className="stat-title">{title}</h4>
+    <CircularProgressbar
+      percentage={Math.round(data / dataMax * 100)}
+      text={data}
+      strokeWidth="15"
+      initialAnimation={true}
+    />
     <div className="stat-text">{statText}</div>
     <div className="substat-text">{substatText}</div>
   </div>
@@ -114,16 +119,16 @@ const StatBlocksRow = ({ stats }) =>
           title="Countries Visited"
           data={stats.placeCountVisited}
           dataMax={stats.placeCountTotal}
-          statText={`Visited ${stats.placeCountVisited} of ${stats.placeCountTotal} places.`}
+          statText={`Visited ${stats.placeCountVisited} of ${stats.placeCountTotal} places`}
           substatText={`UN Countries: ${stats.countryCountVisited}`}
         />
       </div>
       <div className="col-sm-4">
         <StatBlock
-          title="Percentage visited"
+          title="Percent Visited"
           data={Math.round(stats.areaVisited / stats.areaTotal * 100)}
           dataMax="100"
-          statText={`Visited ${Math.round(stats.areaVisited / stats.areaTotal * 100)}% of the world by landmass.`}
+          statText={`Visited ${Math.round(stats.areaVisited / stats.areaTotal * 100)}% of the world by landmass`}
           substatText={`Percent by number of countries: ${Math.round(stats.placeCountVisited / stats.placeCountTotal * 100)}%`}
         />
       </div>
@@ -132,7 +137,7 @@ const StatBlocksRow = ({ stats }) =>
           title="Regions Visited"
           data={stats.regionCountVisited}
           dataMax={stats.regionCountTotal}
-          statText={`Visited ${stats.regionCountVisited} of the ${stats.regionCountTotal} world regions.`}
+          statText={`Visited ${stats.regionCountVisited} of the ${stats.regionCountTotal} world regions`}
           substatText={`Continents: ${stats.continentCountVisited} of ${stats.continentCountTotal}`}
         />
       </div>
