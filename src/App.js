@@ -30,11 +30,14 @@ const PlaceRow = ({ place, visited, onChange }) =>
   </li>
 
 
-const PlacesList = ({ placesByRegion, visitedPlaces, onPlaceRowChange }) =>
+const PlacesList = ({ placesByRegion, visitedPlaces, onPlaceRowChange, filters }) =>
   <div className="place-list">
 
     {Object.keys(placesByRegion).map((region, i) =>
-      <div className="region" id={slugifyString(region)} key={i}>
+      <div className="region"
+           id={slugifyString(region)}
+           key={i}
+           style={{ display: filters.region !== slugifyString(region) ? 'none' : 'block' }}>
         <h4>{region}</h4>
 
         <ul className="list-unstyled">
@@ -62,7 +65,7 @@ const RegionRow = ({ regionName, visitedCount, totalCount, isActive }) =>
   </li>
 
 
-const RegionsFilter = ({ placesByRegion, visitedPlaces }) =>
+const RegionsFilter = ({ placesByRegion, visitedPlaces, filters }) =>
   <div className="region-list">
     <ul className="nav nav-pills flex-column">
       {Object.keys(placesByRegion).map((region, i) => {
@@ -78,35 +81,49 @@ const RegionsFilter = ({ placesByRegion, visitedPlaces }) =>
             regionName={region}
             visitedCount={visitedCount}
             totalCount={placesByRegion[region].length}
-            isActive={i === 0 ? true : false}
+            isActive={filters.region === slugifyString(region) ? true : false}
           />
         );
       })}
     </ul>
   </div>
 
+class FilterablePlaces extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      'filters': {
+        'region': 'africa'
+      }
+    }
+  }
 
-const FilterablePlaces = ({ placesByRegion, visitedPlaces, onPlaceRowChange }) =>
-  <div className="filterable-places container">
-    <div className="row">
-      <div className="col-sm-5 col-md-4">
-        <RegionsFilter
-          placesByRegion={placesByRegion}
-          visitedPlaces={visitedPlaces}
-        />
+  render() {
+    return (
+      <div className="filterable-places container">
+        <div className="row">
+          <div className="col-sm-5 col-md-4">
+            <RegionsFilter
+              placesByRegion={this.props.placesByRegion}
+              visitedPlaces={this.props.visitedPlaces}
+              filters={this.state.filters}
+            />
+          </div>
+          <div className="col-sm-7 col-md-8">
+            <form className="places-form">
+              <PlacesList
+                placesByRegion={this.props.placesByRegion}
+                visitedPlaces={this.props.visitedPlaces}
+                onPlaceRowChange={this.props.onPlaceRowChange}
+                filters={this.state.filters}
+              />
+            </form>
+          </div>
+        </div>
       </div>
-      <div className="col-sm-7 col-md-8">
-        <form className="places-form">
-          <PlacesList
-            placesByRegion={placesByRegion}
-            visitedPlaces={visitedPlaces}
-            onPlaceRowChange={onPlaceRowChange}
-          />
-        </form>
-      </div>
-    </div>
-  </div>
-
+    );
+  }
+}
 
 // See https://www.npmjs.com/package/react-circular-progressbar
 const StatBlock = ({ title, data, dataMax, statText, substatText }) =>
