@@ -105,6 +105,7 @@ const FilterablePlaces = ({ placesByRegion, visitedPlaces }) =>
   </div>
 
 
+// See https://www.npmjs.com/package/react-circular-progressbar
 const StatBlock = ({ title, data, dataMax, statText, substatText }) =>
   <div className="stat-wrapper">
     <h4 className="stat-title">{title}</h4>
@@ -119,7 +120,6 @@ const StatBlock = ({ title, data, dataMax, statText, substatText }) =>
   </div>
 
 
-// https://github.com/joshjg/react-canvas-knob
 const StatBlocksRow = ({ stats }) =>
   <div className="stats container">
     <div className="row">
