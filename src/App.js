@@ -56,16 +56,19 @@ const PlacesList = ({ placesByRegion, visitedPlaces, onPlaceRowChange, filters }
   </div>
 
 
-const RegionRow = ({ regionName, visitedCount, totalCount, isActive }) =>
+const RegionRow = ({ regionName, visitedCount, totalCount, isActive, onClick }) =>
   <li className="nav-item">
-    <a className={`nav-link ${isActive && 'active'}`} href={`#${slugifyString(regionName)}`}>
+    <a className={`nav-link ${isActive && 'active'}`}
+       href={`#${slugifyString(regionName)}`}
+       onClick={onClick}
+    >
       {regionName}
       <span className="float-right badge badge-secondary">{visitedCount} / {totalCount}</span>
     </a>
   </li>
 
 
-const RegionsFilter = ({ placesByRegion, visitedPlaces, filters }) =>
+const RegionsFilter = ({ placesByRegion, visitedPlaces, filters, onRegionRowClick }) =>
   <div className="region-list">
     <ul className="nav nav-pills flex-column">
       {Object.keys(placesByRegion).map((region, i) => {
@@ -82,11 +85,13 @@ const RegionsFilter = ({ placesByRegion, visitedPlaces, filters }) =>
             visitedCount={visitedCount}
             totalCount={placesByRegion[region].length}
             isActive={filters.region === slugifyString(region) ? true : false}
+            onClick={onRegionRowClick}
           />
         );
       })}
     </ul>
   </div>
+
 
 class FilterablePlaces extends Component {
   constructor(props) {
@@ -96,6 +101,17 @@ class FilterablePlaces extends Component {
         'region': 'africa'
       }
     }
+    this.handleRegionRowClick = this.handleRegionRowClick.bind(this);
+  }
+
+  handleRegionRowClick(event) {
+    const regionLinkTarget = event.target.getAttribute('href');
+    this.setState({
+      'filters': {
+        'region': regionLinkTarget.replace('#', '')
+      }
+    })
+    event.preventDefault();
   }
 
   render() {
@@ -107,6 +123,7 @@ class FilterablePlaces extends Component {
               placesByRegion={this.props.placesByRegion}
               visitedPlaces={this.props.visitedPlaces}
               filters={this.state.filters}
+              onRegionRowClick={(e) => this.handleRegionRowClick(e)}
             />
           </div>
           <div className="col-sm-7 col-md-8">
@@ -124,6 +141,7 @@ class FilterablePlaces extends Component {
     );
   }
 }
+
 
 // See https://www.npmjs.com/package/react-circular-progressbar
 const StatBlock = ({ title, data, dataMax, statText, substatText }) =>
