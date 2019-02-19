@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import CircularProgressbar from 'react-circular-progressbar';
 
+import Worldmap from './Worldmap';
 import 'react-circular-progressbar/dist/styles.css';
 import './App.scss';
+
 
 
 // URLs
@@ -192,8 +194,17 @@ const StatBlocksRow = ({ stats }) =>
   </div>
 
 
-const PlacesVisitedMap = ({ }) =>
-  <div className="worldmap container">PlacesVisitedMap Placeholder</div>
+const PlacesVisitedMap = ({ places, visitedPlaces }) =>
+  <div className="worldmap">
+    <div className="container">
+      <div className="worldmap-wrapper">
+        <Worldmap
+          places={places}
+          visitedPlaces={visitedPlaces}
+        />
+      </div>
+    </div>
+  </div>
 
 
 // TODO: Move stat caculations when we decide state
@@ -264,7 +275,10 @@ class EditablePlacesVisitedMap extends Component {
 
     return (
       <div className="traveler-map">
-        <PlacesVisitedMap />
+        <PlacesVisitedMap
+          places={this.props.places}
+          visitedPlaces={placesVisited}
+        />
         <div className="title-block container">
           <h1>Title Placeholder</h1>
           <div>SocialSharingBar placeholder</div>
