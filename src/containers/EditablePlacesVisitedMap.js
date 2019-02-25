@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import decode from 'jwt-decode';
 
-import { createRemotePlaceMap, fetchRemotePlaceMap,
+import { createRemotePlaceMap, fetchRemotePlaceMap, fetchRemotePlaces,
          fetchRemoteUser, updateRemotePlaceMap } from '../apiRouters';
 import FilterablePlaces from './FilterablePlaces';
 import PlacesVisitedMap from '../components/PlacesVisitedMap';
@@ -16,12 +16,16 @@ class EditablePlacesVisitedMap extends Component {
   constructor(props) {
     super(props);
 
-    this.state = this.constructInitialState();
+    this.state = {
+      ...this.constructInitialUserState(),
+      placesLoaded: false
+    };
 
-    // this.fetchAllPlaces = this.fetchAllPlaces.bind(this);
-    this.calculateVisitedStats = this.calculateVisitedStats.bind(this);
+    this.places = [];
+    this.placesByRegion = {};
+    this.totalStats = {};
+
     this.handlePlaceRowChange = this.handlePlaceRowChange.bind(this);
-    // this.handleLocalStorageUpdated = this.handleLocalStorageUpdated.bind(this);
     this.fetchPlaceMapByID = this.fetchPlaceMapByID.bind(this);
     this.fetchUserByID = this.fetchUserByID.bind(this);
     this.handleUserLogout = this.handleUserLogout.bind(this);
@@ -30,7 +34,7 @@ class EditablePlacesVisitedMap extends Component {
     this.updateRemotePlacesVisited = this.updateRemotePlacesVisited.bind(this);
   }
 
-  constructInitialState() {
+  constructInitialUserState() {
     return {
       placemap: {
         id: null,
@@ -80,7 +84,18 @@ class EditablePlacesVisitedMap extends Component {
   }
 
   componentDidMount() {
-    if (localStorage.getItem('jwtToken') && !this.state.user.id) {
+    // Set component level vars based on Places, which are unchanging
+    fetchRemotePlaces()
+      .then(result => {
+        this.places = result.data;
+        this.placesByRegion = createOrderedPlacesByRegionObj(this.places);
+        this.totalStats = calculateTotalStats(this.places);
+      })
+      .then(() => this.setState({ placesLoaded: true }))
+      .catch(error => this.setState({ error }));
+
+    // If there is a JWT Token in storage, set user and their placemap
+    if (localStorage.getItem('jwtToken')) {
       this.setUserFromStorageToken();
     }
   }
@@ -204,13 +219,13 @@ class EditablePlacesVisitedMap extends Component {
 
   render() {
     const { placesVisited } = this.state.placemap;
-    const visitedStats = this.calculateVisitedStats(placesVisited, this.props.places);
-    let stats = {...this.props.totalStats, ...visitedStats};
+    const visitedStats = this.calculateVisitedStats(placesVisited, this.places);
+    let stats = {...this.totalStats, ...visitedStats};
 
     return (
       <div className="traveler-map">
         <PlacesVisitedMap
-          places={this.props.places}
+          places={this.places}
           visitedPlaces={placesVisited}
         />
         {this.state.user.id ?
@@ -222,13 +237,64 @@ class EditablePlacesVisitedMap extends Component {
             toggleUserLoggedIn={this.toggleUserLoggedIn}
           />}
         <StatBlocksRow stats={stats} />
-        <FilterablePlaces placesByRegion={this.props.placesByRegion}
+        <FilterablePlaces placesByRegion={this.placesByRegion}
                           visitedPlaces={placesVisited}
                           onPlaceRowChange={(e) => this.handlePlaceRowChange(e)}
         />
       </div>
     );
   }
+}
+
+function calculateTotalStats(places) {
+  let stats = {
+    'areaTotal': 0,
+    'placeCountTotal': 0,
+    'countryCountTotal': 0,
+    'continentCountTotal': 0,
+    'regionCountTotal': 0
+  };
+  if (places) {
+    const countryIdSet = new Set();
+    const continentIdSet = new Set();
+    const regionSet = new Set();
+    for (const place of places) {
+      // If visitedCountry hasn't been added, add its area to the tally
+      if (!countryIdSet.has(place.country.id)) {
+        stats['areaTotal'] += place.country.area;
+        countryIdSet.add(place.country.id);
+      }
+
+      // Add country, continent, and regions to sets to track unique items
+      continentIdSet.add(place.continent);
+      regionSet.add(place.region);
+    }
+    stats['placeCountTotal'] = places.length;
+    stats['countryCountTotal'] = countryIdSet.size;
+    stats['continentCountTotal'] = continentIdSet.size;
+    stats['regionCountTotal'] = regionSet.size;
+  }
+  return stats;
+}
+
+function createOrderedPlacesByRegionObj(places) {
+  // Create unordered places by region obj
+  let placesByRegion = {};
+  for (const place of places) {
+    if (!(place.region in placesByRegion)) {
+      placesByRegion[place.region] = [];
+    }
+    placesByRegion[place.region].push(place);
+  }
+
+  // Order regions and places alphabetically
+  let orderedPlacesByRegion = {};
+  Object.keys(placesByRegion).sort()
+    .forEach(key => orderedPlacesByRegion[key] = placesByRegion[key].sort(
+      (a, b) => a.name.localeCompare(b.name))
+    );
+
+  return orderedPlacesByRegion;
 }
 
 export default EditablePlacesVisitedMap;
