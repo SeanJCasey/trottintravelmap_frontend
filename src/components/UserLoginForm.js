@@ -1,16 +1,15 @@
 import React from 'react';
 
 
-const UserRegistrationForm = ({ onInputChange, onSubmit }) =>
-  <div className="user-registration-wrapper">
-    <div className="help">Your map selections will be saved!</div>
-    <form className="user-registration-form" onSubmit={onSubmit}>
+const UserLoginForm = ({ onInputChange, onSubmit }) =>
+  <div className="user-login-wrapper">
+    <form className="user-login-form" onSubmit={onSubmit}>
       <div className="form-group">
         <input
           name="email"
           type="email"
           className="form-control"
-          id="registrationInputEmail"
+          id="loginInputEmail"
           placeholder="Email address"
           onChange={onInputChange}
         />
@@ -20,13 +19,13 @@ const UserRegistrationForm = ({ onInputChange, onSubmit }) =>
           name="password"
           type="password"
           className="form-control"
-          id="registrationInputPassword"
+          id="loginInputPassword"
           placeholder="Password"
           onChange={onInputChange}
         />
       </div>
-      <button type="submit" className="btn btn-primary" id="userRegistrationSubmitButton">Register</button>
+      <button type="submit" className="btn btn-primary" id="userLoginSubmitButton">Login</button>
     </form>
   </div>
 
-export default UserRegistrationForm;
+export default UserLoginForm;

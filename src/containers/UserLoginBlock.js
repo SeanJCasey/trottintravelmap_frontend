@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import { createRemoteUser, fetchRemoteUserAuthToken } from '../apiRouters';
+import UserLoginForm from '../components/UserLoginForm';
 import UserRegistrationForm from '../components/UserRegistrationForm';
 
 
@@ -9,20 +10,24 @@ class UserLoginBlock extends Component {
     super(props);
 
     this.state = {
-      'email': '',
-      'password': '',
+      'registrationInputs': {
+        'email': '',
+        'password': '',
+      },
+      'loginInputs': {
+        'email': '',
+        'password': '',
+      }
       // 'messages': {
       //   'errors': {},
       //   'successes': []
       // },
     }
     // this.handleAPIError = this.handleAPIError.bind(this);
-    this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  handleInputChange(event) {
-    this.setState({ [event.target.name]: event.target.value });
+    this.handleLoginInputChange = this.handleLoginInputChange.bind(this);
+    this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
+    this.handleRegistrationInputChange = this.handleRegistrationInputChange.bind(this);
+    this.handleRegistrationSubmit = this.handleRegistrationSubmit.bind(this);
   }
 
   // handleAPIError(result) {
@@ -40,32 +45,62 @@ class UserLoginBlock extends Component {
   //   this.setState({ messages: { errors: newErrors } });
   // }
 
-  handleSubmit(event) {
+  handleLoginInputChange(event) {
+    this.setState({
+      loginInputs: {
+        ...this.state.loginInputs,
+        [event.target.name]: event.target.value
+      }
+    });
+  }
+
+  handleLoginSubmit(event) {
     event.preventDefault();
 
     // this.setState({ messages: { errors: {} } });
 
-    const email = this.state.email;
-    const password = this.state.password;
+    const {email, password} = this.state.loginInputs;
+    this.loginUser(email, password);
+  }
 
-    // Register the user, then retrieve a JWT for the user
+  handleRegistrationInputChange(event) {
+    this.setState({
+      registrationInputs: {
+        ...this.state.registrationInputs,
+        [event.target.name]: event.target.value
+      }
+    });
+  }
+
+  handleRegistrationSubmit(event) {
+    event.preventDefault();
+
+    // this.setState({ messages: { errors: {} } });
+
+    const {email, password} = this.state.registrationInputs;
+
+    // Register the user, then log them in
     createRemoteUser(email, password)
+      .then(result => this.loginUser(email, password))
+      .catch(error => console.log(error.response));
+  }
+
+  loginUser(email, password) {
+    // Retrieve and set a JWT for the user
+    fetchRemoteUserAuthToken(email, password)
       .then(result => {
-        fetchRemoteUserAuthToken(email, password)
-          .then(result => {
-            // Grab JWT
-            localStorage.setItem('jwtToken', result.data.token);
-            this.props.toggleUserLoggedIn();
-            // this.setState({
-            //   'messages': {
-            //     'successes': [
-            //       ...this.state.messages.successes,
-            //       "User saved!"
-            //     ]
-            //   }
-            // });
-          })
-          .catch(error => console.log(error.response));
+        // Set JWT in localStorage
+        localStorage.setItem('jwtToken', result.data.token);
+        // Signal to parent component that user has logged in
+        this.props.toggleUserLoggedIn();
+        // this.setState({
+        //   'messages': {
+        //     'successes': [
+        //       ...this.state.messages.successes,
+        //       "User saved!"
+        //     ]
+        //   }
+        // });
       })
       .catch(error => console.log(error.response));
   }
@@ -99,8 +134,12 @@ class UserLoginBlock extends Component {
             {messageAlerts}
           </div>
           <UserRegistrationForm
-            onSubmit={this.handleSubmit}
-            onInputChange={this.handleInputChange}
+            onSubmit={this.handleRegistrationSubmit}
+            onInputChange={this.handleRegistrationInputChange}
+          />
+          <UserLoginForm
+            onSubmit={this.handleLoginSubmit}
+            onInputChange={this.handleLoginInputChange}
           />
         </div>
       </div>
