@@ -23,7 +23,7 @@ class EditablePlacesVisitedMap extends Component {
 
     this.places = [];
     this.placesByRegion = {};
-    this.totalStats = {};
+    this.statsTotal = {};
 
     this.handlePlaceRowChange = this.handlePlaceRowChange.bind(this);
     this.fetchPlaceMapByID = this.fetchPlaceMapByID.bind(this);
@@ -48,48 +48,13 @@ class EditablePlacesVisitedMap extends Component {
     };
   }
 
-  calculateVisitedStats(placesVisted, places) {
-    let stats = {
-      areaVisited: 0,
-      placeCountVisited: 0,
-      countryCountVisited: 0,
-      continentCountVisited: 0,
-      regionCountVisited: 0
-    };
-    if (placesVisted.length && places.length) {
-      // Calculated Visited stats
-      const visitedCountryIdSet = new Set();
-      const visitedContinentIdSet = new Set();
-      const visitedRegionSet = new Set();
-      stats['areaVisited'] = 0;
-      for (const placeID of placesVisted) {
-        const place = places.find(place => place.id === placeID);
-        // If visitedCountry hasn't been added, add its area to the tally
-        if (!visitedCountryIdSet.has(place.country.id)) {
-          stats['areaVisited'] += place.country.area;
-        }
-
-        // Add country, continent, and regions to sets to track unique items
-        visitedCountryIdSet.add(place.country.id);
-        visitedContinentIdSet.add(place.continent);
-        visitedRegionSet.add(place.region);
-      }
-      stats['placeCountVisited'] = placesVisted.length;
-      stats['countryCountVisited'] = visitedCountryIdSet.size;
-      stats['continentCountVisited'] = visitedContinentIdSet.size;
-      stats['regionCountVisited'] = visitedRegionSet.size;
-    }
-
-    return stats;
-  }
-
   componentDidMount() {
     // Set component level vars based on Places, which are unchanging
     fetchRemotePlaces()
       .then(result => {
         this.places = result.data;
         this.placesByRegion = createOrderedPlacesByRegionObj(this.places);
-        this.totalStats = calculateTotalStats(this.places);
+        this.statsTotal = calculateStatsForPlaces(this.places);
       })
       .then(() => this.setState({ placesLoaded: true }))
       .catch(error => this.setState({ error }));
@@ -218,27 +183,35 @@ class EditablePlacesVisitedMap extends Component {
   }
 
   render() {
-    const { placesVisited } = this.state.placemap;
-    const visitedStats = this.calculateVisitedStats(placesVisited, this.places);
-    let stats = {...this.totalStats, ...visitedStats};
+    const { placemap, user } = this.state;
+    const { places, placesByRegion, statsTotal } = this;
+
+    // Associate placesVisited IDs with their places for stat calcs
+    const placesVisitedObjects = placemap.placesVisited.map(placeID =>
+      places.find(place => place.id === placeID)
+    );
+    const statsVisited = calculateStatsForPlaces(placesVisitedObjects);
 
     return (
       <div className="traveler-map">
         <PlacesVisitedMap
-          places={this.places}
-          visitedPlaces={placesVisited}
+          places={places}
+          visitedPlaces={placemap.placesVisited}
         />
-        {this.state.user.id ?
+        {user.id ?
           <UserAccountOptionsBlock
-            userName={this.state.user.name}
+            userName={user.name}
             onUserLogout={this.handleUserLogout}
           /> :
           <UserLoginBlock
             toggleUserLoggedIn={this.toggleUserLoggedIn}
           />}
-        <StatBlocksRow stats={stats} />
-        <FilterablePlaces placesByRegion={this.placesByRegion}
-                          visitedPlaces={placesVisited}
+        <StatBlocksRow
+          statsTotal={statsTotal}
+          statsVisited={statsVisited}
+        />
+        <FilterablePlaces placesByRegion={placesByRegion}
+                          visitedPlaces={placemap.placesVisited}
                           onPlaceRowChange={(e) => this.handlePlaceRowChange(e)}
         />
       </div>
@@ -246,22 +219,22 @@ class EditablePlacesVisitedMap extends Component {
   }
 }
 
-function calculateTotalStats(places) {
+function calculateStatsForPlaces(places) {
   let stats = {
-    'areaTotal': 0,
-    'placeCountTotal': 0,
-    'countryCountTotal': 0,
-    'continentCountTotal': 0,
-    'regionCountTotal': 0
+    'area': 0,
+    'placeCount': 0,
+    'countryCount': 0,
+    'continentCount': 0,
+    'regionCount': 0
   };
   if (places) {
     const countryIdSet = new Set();
     const continentIdSet = new Set();
     const regionSet = new Set();
     for (const place of places) {
-      // If visitedCountry hasn't been added, add its area to the tally
+      // If country hasn't been added, add its area to the tally
       if (!countryIdSet.has(place.country.id)) {
-        stats['areaTotal'] += place.country.area;
+        stats['area'] += place.country.area;
         countryIdSet.add(place.country.id);
       }
 
@@ -269,10 +242,10 @@ function calculateTotalStats(places) {
       continentIdSet.add(place.continent);
       regionSet.add(place.region);
     }
-    stats['placeCountTotal'] = places.length;
-    stats['countryCountTotal'] = countryIdSet.size;
-    stats['continentCountTotal'] = continentIdSet.size;
-    stats['regionCountTotal'] = regionSet.size;
+    stats['placeCount'] = places.length;
+    stats['countryCount'] = countryIdSet.size;
+    stats['continentCount'] = continentIdSet.size;
+    stats['regionCount'] = regionSet.size;
   }
   return stats;
 }
