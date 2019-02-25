@@ -10,53 +10,57 @@ const Worldmap = ({ places, visitedPlaces }) =>
     viewBox="0 0 950 620"
     id="WorldmapSVG"
   >
-    <style type="text/css">
-      {visitedPlaces.map(visitedPlaceID => {
-        const place = places.find(place => place.id === visitedPlaceID)
-        let fillColors = ['white'];
-        switch (place.region) {
-          case 'Atlantic Ocean':
-            fillColors = ['3498db', '48a2de', '5cace2'];
-            break;
-          case 'Pacific Ocean':
-            fillColors = ['8e44ad', '7f3d9b', '9956b5'];
-            break;
-          case 'Caribbean':
-            fillColors = ['f39c12', 'da8c10', 'f4a529'];
-            break;
-          case 'Europe & Mediterranean':
-            fillColors = ['c0392b', 'ac3326', 'c64c40'];
-            break;
-          case 'Central America':
-            fillColors = ['34495e', '2e4154', '485b6e'];
-            break;
-          case 'Antartica':
-            fillColors = ['ecf0f1', 'd4d8d8', 'edf1f2'];
-            break;
-          case 'Africa':
-            fillColors = ['f1c40f', 'd8b00d', 'f2c926'];
-            break;
-          case 'Asia':
-            fillColors = ['E67E22', 'cf711e', 'e88a38'];
-            break;
-          case 'Indian Ocean':
-            fillColors = ['fdd443', 'e3be3c', 'fdd855'];
-            break;
-          case 'North America':
-            fillColors = ['27ae60', '239c56', '3cb66f'];
-            break;
-          case 'South America':
-            fillColors = ['d35400', 'bd4b00', 'd76519'];
-            break;
-          case 'Middle East':
-            fillColors = ['16a085', '139077', '2da991'];
-            break;
-        }
-        // Choose a random color shade from the region's colors to fill
-        const fill = fillColors[Math.floor(Math.random() * fillColors.length)];
-        return `#WorldmapSVG .${place.code} { fill: #${fill}; }`
-      })}
-    </style>
+    {places.length && visitedPlaces.length &&
+      <style type="text/css">
+        {visitedPlaces.map(visitedPlaceID => {
+          const place = places.find(place => place.id === visitedPlaceID)
+          let fillColors = [];
+          switch (place.region) {
+            case 'Atlantic Ocean':
+              fillColors = ['3498db', '48a2de', '5cace2'];
+              break;
+            case 'Pacific Ocean':
+              fillColors = ['8e44ad', '7f3d9b', '9956b5'];
+              break;
+            case 'Caribbean':
+              fillColors = ['f39c12', 'da8c10', 'f4a529'];
+              break;
+            case 'Europe & Mediterranean':
+              fillColors = ['c0392b', 'ac3326', 'c64c40'];
+              break;
+            case 'Central America':
+              fillColors = ['34495e', '2e4154', '485b6e'];
+              break;
+            case 'Antartica':
+              fillColors = ['ecf0f1', 'd4d8d8', 'edf1f2'];
+              break;
+            case 'Africa':
+              fillColors = ['f1c40f', 'd8b00d', 'f2c926'];
+              break;
+            case 'Asia':
+              fillColors = ['E67E22', 'cf711e', 'e88a38'];
+              break;
+            case 'Indian Ocean':
+              fillColors = ['fdd443', 'e3be3c', 'fdd855'];
+              break;
+            case 'North America':
+              fillColors = ['27ae60', '239c56', '3cb66f'];
+              break;
+            case 'South America':
+              fillColors = ['d35400', 'bd4b00', 'd76519'];
+              break;
+            case 'Middle East':
+              fillColors = ['16a085', '139077', '2da991'];
+              break;
+            default:
+              fillColors = ['white'];
+          }
+          // Choose a random color shade from the region's colors to fill
+          const fill = fillColors[Math.floor(Math.random() * fillColors.length)];
+          return `#WorldmapSVG .${place.code} { fill: #${fill}; }`
+        })}
+      </style>
+    }
     <rect width="950" height="620"></rect>
 
     <path id="kalimantan" className="kalimantan" title="Kalimantan" d="M781.68,324.4l-2.31,8.68l-12.53,4.23l-3.75-4.4l-1.82,0.5l3.4,13.12l5.09,0.57l6.79,2.57v2.57l3.11-0.57l4.53-6.27v-5.13l2.55-5.13l2.83,0.57l-3.4-7.13l-0.52-4.59L781.68,324.4L781.68,324.4z"/>
