@@ -173,7 +173,7 @@ class EditablePlacesVisitedMap extends Component {
     delete axios.defaults.headers.common["Authorization"];
 
     // Reset state to initial conditions
-    this.setState(this.constructInitialState());
+    this.setState(this.constructInitialUserState());
   }
 
   updateRemotePlacesVisited(placesVisited) {
