@@ -187,9 +187,13 @@ class EditablePlacesVisitedMap extends Component {
     const { places, placesByRegion, statsTotal } = this;
 
     // Associate placesVisited IDs with their places for stat calcs
-    const placesVisitedObjects = placemap.placesVisited.map(placeID =>
-      places.find(place => place.id === placeID)
-    );
+    // TODO - Re-do check to make sure places is not empty array
+    let placesVisitedObjects = []
+    if (places.length) {
+      placesVisitedObjects = placemap.placesVisited.map(placeID =>
+        places.find(place => place.id === placeID)
+      );
+    }
     const statsVisited = calculateStatsForPlaces(placesVisitedObjects);
 
     return (
@@ -227,7 +231,7 @@ function calculateStatsForPlaces(places) {
     'continentCount': 0,
     'regionCount': 0
   };
-  if (places) {
+  if (places.length) {
     const countryIdSet = new Set();
     const continentIdSet = new Set();
     const regionSet = new Set();
