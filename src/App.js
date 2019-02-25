@@ -1,20 +1,27 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import decode from 'jwt-decode';
 import CircularProgressbar from 'react-circular-progressbar';
 
 import Worldmap from './Worldmap';
 import 'react-circular-progressbar/dist/styles.css';
 import './App.scss';
 
-
-
 // URLs
-const PATH_BASE = 'http://127.0.0.1:8000/api';
+const PATH_BASE = 'http://127.0.0.1:8000';
+const PATH_API = '/api';
 const PATH_PLACES = '/places';
 const PATH_PLACEMAPS = '/placemaps';
+const PATH_USERS = '/users';
+const PATH_LOGIN = '/api-token-auth';
 
-const URL_PLACES = `${PATH_BASE}${PATH_PLACES}`;
-const URL_PLACEMAPS = `${PATH_BASE}${PATH_PLACEMAPS}`;
+const URL_PLACES = `${PATH_BASE}${PATH_API}${PATH_PLACES}`;
+const URL_PLACEMAPS = `${PATH_BASE}${PATH_API}${PATH_PLACEMAPS}`;
+const URL_USERS = `${PATH_BASE}${PATH_API}${PATH_USERS}`;
+
+const URL_LOGIN = `${PATH_BASE}${PATH_LOGIN}`;
+const URL_REGISTER = URL_USERS;
+
 
 const PlaceRow = ({ place, visited, onChange }) =>
   <li className="place">
@@ -207,52 +214,233 @@ const PlacesVisitedMap = ({ places, visitedPlaces }) =>
   </div>
 
 
+const UserRegistrationForm = ({ onInputChange, onSubmit }) =>
+  <form className="user-login-form" onSubmit={onSubmit}>
+    <div className="form-group">
+      <input
+        name="email"
+        type="email"
+        className="form-control"
+        id="loginInputEmail"
+        placeholder="Email address"
+        onChange={onInputChange}
+      />
+    </div>
+    <div className="form-group">
+      <input
+        name="password"
+        type="password"
+        className="form-control"
+        id="loginInputPassword"
+        placeholder="Password"
+        onChange={onInputChange}
+      />
+    </div>
+    <button type="submit" className="btn btn-primary" id="userRegisterButton">Save Map</button>
+  </form>
+
+
+const UserAccountOptionsBlock = ({ userName, onUserLogout }) =>
+  <div className="user-account-options">
+    <div className="container">
+      <h1>{ userName }'s Travel Map</h1>
+      <div className="logout">
+        <button
+          className="btn btn-outline-secondary btn-sm"
+          onClick={onUserLogout}
+        >
+        Logout
+        </button>
+      </div>
+      <div>SocialSharingBar placeholder</div>
+    </div>
+  </div>
+
+
+class UserLoginBlock extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      'email': '',
+      'password': '',
+      // 'messages': {
+      //   'errors': {},
+      //   'successes': []
+      // },
+    }
+    // this.handleAPIError = this.handleAPIError.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleInputChange(event) {
+    this.setState({ [event.target.name]: event.target.value });
+  }
+
+  // handleAPIError(result) {
+  //   // Get and copy current errors
+  //   const { errors } = this.state.messages;
+  //   let newErrors = {...errors};
+  //   console.log(result.response);
+  //   Object.keys(result.response.data).forEach(category => {
+  //     const errorMessages = result.response.data[category];
+  //     if (!(category in newErrors)) {
+  //       newErrors[category] = [];
+  //     }
+  //     newErrors[category] = [...newErrors[category], errorMessages];
+  //   });
+  //   this.setState({ messages: { errors: newErrors } });
+  // }
+
+  handleSubmit(event) {
+    event.preventDefault();
+
+    // this.setState({ messages: { errors: {} } });
+
+    const email = this.state.email;
+    const password = this.state.password;
+
+    // Register the user, then retrieve a JWT for the user
+    axios.post(URL_REGISTER, {email, password})
+      .then(result => {
+        axios.post(URL_LOGIN, {email, password})
+          .then(result => {
+            // Grab JWT
+            localStorage.setItem('jwtToken', result.data.token);
+            this.props.toggleUserLoggedIn();
+            // this.setState({
+            //   'messages': {
+            //     'successes': [
+            //       ...this.state.messages.successes,
+            //       "User saved!"
+            //     ]
+            //   }
+            // });
+          })
+          .catch(error => console.log(error.response));
+      })
+      .catch(error => console.log(error.response));
+  }
+
+  render() {
+
+    let messageAlerts = []
+    // const { errors } = this.state.messages;
+    // let errorAlerts = []
+    // Object.keys(errors).forEach((category, index1) => {
+    //   errors[category].forEach((message, index2) =>
+    //     errorAlerts.push(
+    //       <div
+    //         className="alert alert-danger"
+    //         key={`${index1}-${index2}`}
+    //       >
+    //         {category}: {message}
+    //       </div>
+    //     )
+    //   )
+    // });
+    // messageAlerts = [
+    //   ...errorAlerts,
+    // ];
+
+    return (
+      <div className="user-login">
+        <div className="container">
+          <h1>Create Your Travel Map</h1>
+          <div className="messages">
+            {messageAlerts}
+          </div>
+          <UserRegistrationForm
+            onSubmit={this.handleSubmit}
+            onInputChange={this.handleInputChange}
+          />
+        </div>
+      </div>
+    );
+  }
+
+}
+
+
 // TODO: Move stat caculations when we decide state
 class EditablePlacesVisitedMap extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      placemap: {
-        placesVisited: []
-      },
-      error: null
-    };
+    this.state = this.constructInitialState();
 
     // this.fetchAllPlaces = this.fetchAllPlaces.bind(this);
+    this.calculateVisitedStats = this.calculateVisitedStats.bind(this);
     this.handlePlaceRowChange = this.handlePlaceRowChange.bind(this);
+    // this.handleLocalStorageUpdated = this.handleLocalStorageUpdated.bind(this);
+    this.fetchPlaceMapByID = this.fetchPlaceMapByID.bind(this);
+    this.fetchUserByID = this.fetchUserByID.bind(this);
+    this.handleUserLogout = this.handleUserLogout.bind(this);
+    this.setUserFromStorageToken = this.setUserFromStorageToken.bind(this);
+    this.toggleUserLoggedIn = this.toggleUserLoggedIn.bind(this);
+    this.updateRemotePlacesVisited = this.updateRemotePlacesVisited.bind(this);
   }
 
-  calculateVisitedStats(placesVisted) {
-    let stats = {};
-    // Calculated Visited stats
-    const visitedCountryIdSet = new Set();
-    const visitedContinentIdSet = new Set();
-    const visitedRegionSet = new Set();
-    stats['areaVisited'] = 0;
-    for (const placeID of placesVisted) {
-      const place = this.props.places.find(place => place.id === placeID);
-      // If visitedCountry hasn't been added, add its area to the tally
-      if (!visitedCountryIdSet.has(place.country.id)) {
-        stats['areaVisited'] += place.country.area;
+  constructInitialState() {
+    return {
+      placemap: {
+        id: null,
+        placesVisited: []
+      },
+      user: {
+        id: null,
+        name: null,
+        email: null
       }
+    };
+  }
 
-      // Add country, continent, and regions to sets to track unique items
-      visitedCountryIdSet.add(place.country.id);
-      visitedContinentIdSet.add(place.continent);
-      visitedRegionSet.add(place.region);
+  calculateVisitedStats(placesVisted, places) {
+    let stats = {
+      areaVisited: 0,
+      placeCountVisited: 0,
+      countryCountVisited: 0,
+      continentCountVisited: 0,
+      regionCountVisited: 0
+    };
+    if (placesVisted.length && places.length) {
+      // Calculated Visited stats
+      const visitedCountryIdSet = new Set();
+      const visitedContinentIdSet = new Set();
+      const visitedRegionSet = new Set();
+      stats['areaVisited'] = 0;
+      for (const placeID of placesVisted) {
+        const place = places.find(place => place.id === placeID);
+        // If visitedCountry hasn't been added, add its area to the tally
+        if (!visitedCountryIdSet.has(place.country.id)) {
+          stats['areaVisited'] += place.country.area;
+        }
+
+        // Add country, continent, and regions to sets to track unique items
+        visitedCountryIdSet.add(place.country.id);
+        visitedContinentIdSet.add(place.continent);
+        visitedRegionSet.add(place.region);
+      }
+      stats['placeCountVisited'] = placesVisted.length;
+      stats['countryCountVisited'] = visitedCountryIdSet.size;
+      stats['continentCountVisited'] = visitedContinentIdSet.size;
+      stats['regionCountVisited'] = visitedRegionSet.size;
     }
-    stats['placeCountVisited'] = placesVisted.length;
-    stats['countryCountVisited'] = visitedCountryIdSet.size;
-    stats['continentCountVisited'] = visitedContinentIdSet.size;
-    stats['regionCountVisited'] = visitedRegionSet.size;
 
     return stats;
   }
 
+  componentDidMount() {
+    if (localStorage.getItem('jwtToken') && !this.state.user.id) {
+      this.setUserFromStorageToken();
+    }
+  }
+
   handlePlaceRowChange(event) {
+    const { placemap } = this.state;
     const placeID = Number(event.target.value);
-    let placesVisited = this.state.placemap.placesVisited.slice();
+    let placesVisited = placemap.placesVisited.slice();
 
     if (placesVisited.includes(placeID)) {
       placesVisited = placesVisited.filter(item => item !== placeID);
@@ -261,16 +449,119 @@ class EditablePlacesVisitedMap extends Component {
       placesVisited.push(placeID);
     }
 
+    // Update state with new placesVisited and also update the remote db
     this.setState({
       placemap: {
         placesVisited: placesVisited
       }
-    })
+    });
+    if (placemap.id) {
+      this.updateRemotePlacesVisited(placesVisited);
+    }
+  }
+
+  handleUserLogout() {
+    this.unsetUser();
+  }
+
+  setUserFromStorageToken() {
+    if (localStorage.getItem('jwtToken')) {
+      const jwtToken = localStorage.getItem('jwtToken');
+
+      // Set default Auth token for all requests
+      axios.defaults.headers.common["Authorization"] = `JWT ${jwtToken}`;
+
+      // Set user and placemap states
+      const decoded = decode(jwtToken);
+      // Fetch User data first to ensure JWT validity and get fields
+      this.fetchUserByID(decoded.user_id)
+        .then(user => {
+          if (user.placemap) {
+            this.fetchPlaceMapByID(user.placemap);
+          }
+          else {
+            this.createPlaceMapForUserID(user.id);
+          }
+        })
+        .catch(error => console.log(error));
+    }
+  }
+
+  createPlaceMapForUserID(userID) {
+    const { placesVisited } = this.state.placemap;
+    const url = `${URL_PLACEMAPS}`;
+    const body = { user: userID, places: placesVisited };
+    // TODO - handle errors
+    return axios.post(url, body)
+      .then(result => {
+        this.setState({
+          placemap: {
+            id: result.response.data.id,
+            // placesVisited: result.response.data.places
+          }
+        });
+        return result.data;
+      })
+      .catch(error => console.log(error.response));
+  }
+
+  fetchPlaceMapByID(placemapID) {
+    const url = `${URL_PLACEMAPS}/${placemapID}`;
+    // TODO - handle errors
+    return axios.get(url)
+      .then(result => {
+        this.setState({
+          placemap: {
+            id: result.data.id,  // prob redundant, but might as well set
+            placesVisited: result.data.places
+          }
+        });
+        return result.data;
+      });
+  }
+
+  fetchUserByID(userID) {
+    const url = `${URL_USERS}/${userID}`;
+    // TODO - handle errors
+    return axios.get(url)
+      .then(result => {
+        this.setState({
+          user: {
+            id: result.data.id,
+            email: result.data.email,
+            name: result.data.email
+          }
+        })
+        return result.data;
+      });
+  }
+
+  toggleUserLoggedIn() {
+    this.setUserFromStorageToken()
+  }
+
+  unsetUser() {
+    // Remove JWT from local storage
+    localStorage.removeItem('jwtToken');
+
+    // Remove JWT from axios header
+    delete axios.defaults.headers.common["Authorization"];
+
+    // Reset state to initial conditions
+    this.setState(this.constructInitialState());
+  }
+
+  updateRemotePlacesVisited(placesVisited) {
+    const url = `${URL_PLACEMAPS}/${this.state.placemap.id}`;
+    const body = { places: placesVisited };
+    // TODO - handle errors
+    axios.patch(url, body)
+      .catch(error => console.log(error.response));
   }
 
   render() {
     const { placesVisited } = this.state.placemap;
-    const visitedStats = this.calculateVisitedStats(placesVisited);
+    const visitedStats = this.calculateVisitedStats(placesVisited, this.props.places);
     let stats = {...this.props.totalStats, ...visitedStats};
 
     return (
@@ -279,10 +570,14 @@ class EditablePlacesVisitedMap extends Component {
           places={this.props.places}
           visitedPlaces={placesVisited}
         />
-        <div className="title-block container">
-          <h1>Title Placeholder</h1>
-          <div>SocialSharingBar placeholder</div>
-        </div>
+        {this.state.user.id ?
+          <UserAccountOptionsBlock
+            userName={this.state.user.name}
+            onUserLogout={this.handleUserLogout}
+          /> :
+          <UserLoginBlock
+            toggleUserLoggedIn={this.toggleUserLoggedIn}
+          />}
         <StatBlocksRow stats={stats} />
         <FilterablePlaces placesByRegion={this.props.placesByRegion}
                           visitedPlaces={placesVisited}
@@ -302,35 +597,37 @@ class App extends Component {
       places: [],
       error: null
     };
-
-    // this.fetchAllPlaces = this.fetchAllPlaces.bind(this);
   }
 
   // Calculate Total stats based on places only once, when app loads
-  calculateTotalStats() {
-    const { places } = this.state;
-    let stats = {};
+  calculateTotalStats(places) {
+    let stats = {
+      'areaTotal': 0,
+      'placeCountTotal': 0,
+      'countryCountTotal': 0,
+      'continentCountTotal': 0,
+      'regionCountTotal': 0
+    };
+    if (places) {
+      const countryIdSet = new Set();
+      const continentIdSet = new Set();
+      const regionSet = new Set();
+      for (const place of places) {
+        // If visitedCountry hasn't been added, add its area to the tally
+        if (!countryIdSet.has(place.country.id)) {
+          stats['areaTotal'] += place.country.area;
+          countryIdSet.add(place.country.id);
+        }
 
-    const countryIdSet = new Set();
-    const continentIdSet = new Set();
-    const regionSet = new Set();
-    stats['areaTotal'] = 0;
-    for (const place of places) {
-      // If visitedCountry hasn't been added, add its area to the tally
-      if (!countryIdSet.has(place.country.id)) {
-        stats['areaTotal'] += place.country.area;
-        countryIdSet.add(place.country.id);
+        // Add country, continent, and regions to sets to track unique items
+        continentIdSet.add(place.continent);
+        regionSet.add(place.region);
       }
-
-      // Add country, continent, and regions to sets to track unique items
-      continentIdSet.add(place.continent);
-      regionSet.add(place.region);
+      stats['placeCountTotal'] = places.length;
+      stats['countryCountTotal'] = countryIdSet.size;
+      stats['continentCountTotal'] = continentIdSet.size;
+      stats['regionCountTotal'] = regionSet.size;
     }
-    stats['placeCountTotal'] = places.length;
-    stats['countryCountTotal'] = countryIdSet.size;
-    stats['continentCountTotal'] = continentIdSet.size;
-    stats['regionCountTotal'] = regionSet.size;
-
     return stats;
   }
 
@@ -374,11 +671,15 @@ class App extends Component {
     const placesByRegion = this.createOrderedPlacesByRegionObj(places);
 
     return (
-      <EditablePlacesVisitedMap
-        places={places}
-        placesByRegion={placesByRegion}
-        totalStats={this.calculateTotalStats()}
-      />
+      <div className="app-wrapper">
+      {places.length ?
+        <EditablePlacesVisitedMap
+          places={places}
+          placesByRegion={placesByRegion}
+          totalStats={this.calculateTotalStats(places)}
+        /> :
+        'Waiting'}
+      </div>
     );
   }
 }
