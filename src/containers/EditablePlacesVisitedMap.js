@@ -116,20 +116,20 @@ class EditablePlacesVisitedMap extends Component {
   }
 
   createPlaceMapForUserID(userID) {
-    const { placesVisited } = this.state.placemap;
+    const placemap = this.state.placemap;
 
     // TODO - handle errors
-    return createRemotePlaceMap(userID, placesVisited)
+    return createRemotePlaceMap(userID, placemap.placesVisited)
       .then(result => {
         this.setState({
           placemap: {
-            id: result.response.data.id,
-            // placesVisited: result.response.data.places
+            ...placemap,
+            id: result.data.id,
           }
         });
-        return result.response.data;
+        return result.data;
       })
-      .catch(error => console.log(error.response));
+      .catch(error => console.log(error));
   }
 
   fetchPlaceMapByID(placemapID) {
