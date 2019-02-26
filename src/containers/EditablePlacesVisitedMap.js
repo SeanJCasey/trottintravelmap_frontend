@@ -202,22 +202,32 @@ class EditablePlacesVisitedMap extends Component {
           places={places}
           visitedPlaces={placemap.placesVisited}
         />
-        {user.id ?
-          <UserAccountOptionsBlock
-            userName={user.name}
-            onUserLogout={this.handleUserLogout}
-          /> :
+        <div className="main-content-wrapper">
+          <div className="container">
+            {user.id ?
+              <h1>{user.name}'s Travel Map</h1> :
+              <h1>Fill In Your Travel Map</h1>
+            }
+            {user.id &&
+              <UserAccountOptionsBlock
+                userName={user.name}
+                onUserLogout={this.handleUserLogout}
+              />}
+            <StatBlocksRow
+              statsTotal={statsTotal}
+              statsVisited={statsVisited}
+            />
+            <FilterablePlaces placesByRegion={placesByRegion}
+                              visitedPlaces={placemap.placesVisited}
+                              onPlaceRowChange={(e) => this.handlePlaceRowChange(e)}
+            />
+          </div>
+        </div>
+        {!user.id &&
           <UserLoginBlock
             toggleUserLoggedIn={this.toggleUserLoggedIn}
-          />}
-        <StatBlocksRow
-          statsTotal={statsTotal}
-          statsVisited={statsVisited}
-        />
-        <FilterablePlaces placesByRegion={placesByRegion}
-                          visitedPlaces={placemap.placesVisited}
-                          onPlaceRowChange={(e) => this.handlePlaceRowChange(e)}
-        />
+          />
+        }
       </div>
     );
   }

@@ -128,20 +128,27 @@ class UserLoginBlock extends Component {
     // ];
 
     return (
-      <div className="user-login">
+      <div className="user-login-wrapper">
         <div className="container">
-          <h1>Create Your Travel Map</h1>
           <div className="messages">
             {messageAlerts}
           </div>
-          <UserRegistrationForm
-            onSubmit={this.handleRegistrationSubmit}
-            onInputChange={this.handleRegistrationInputChange}
-          />
-          <UserLoginForm
-            onSubmit={this.handleLoginSubmit}
-            onInputChange={this.handleLoginInputChange}
-          />
+          <div className="row">
+            <div className="col-sm-8">
+              <h2>Save this Map</h2>
+              <UserRegistrationForm
+                onSubmit={this.handleRegistrationSubmit}
+                onInputChange={this.handleRegistrationInputChange}
+              />
+            </div>
+            <div className="col-sm-4">
+              <h2>Login</h2>
+              <UserLoginForm
+                onSubmit={this.handleLoginSubmit}
+                onInputChange={this.handleLoginInputChange}
+              />
+            </div>
+          </div>
         </div>
       </div>
     );

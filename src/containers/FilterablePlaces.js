@@ -27,7 +27,7 @@ class FilterablePlaces extends Component {
 
   render() {
     return (
-      <div className="filterable-places container">
+      <div className="filterable-places">
         <div className="row">
           <div className="col-sm-5 col-md-4">
             <RegionsFilter
