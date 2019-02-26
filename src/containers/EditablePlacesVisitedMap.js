@@ -154,7 +154,7 @@ class EditablePlacesVisitedMap extends Component {
           user: {
             id: result.data.id,
             email: result.data.email,
-            name: result.data.email
+            name: result.data.name
           }
         })
         return result.data;

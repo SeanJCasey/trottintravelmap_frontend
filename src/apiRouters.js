@@ -43,8 +43,8 @@ export function createRemotePlaceMap(userID, placesVisited) {
   return axios.post(url, body);
 }
 
-export function createRemoteUser(email, password) {
-  return axios.post(URL_REGISTER, {email, password});
+export function createRemoteUser(email, name, password) {
+  return axios.post(URL_REGISTER, {email, name, password});
 }
 
 export function updateRemotePlaceMap(placemapID, placesVisited) {

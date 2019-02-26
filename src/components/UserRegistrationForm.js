@@ -7,6 +7,16 @@ const UserRegistrationForm = ({ onInputChange, onSubmit }) =>
     <form className="user-registration-form" onSubmit={onSubmit}>
       <div className="form-group">
         <input
+          name="name"
+          type="name"
+          className="form-control"
+          id="registrationInputName"
+          placeholder="Your Name"
+          onChange={onInputChange}
+        />
+      </div>
+      <div className="form-group">
+        <input
           name="email"
           type="email"
           className="form-control"

@@ -12,6 +12,7 @@ class UserLoginBlock extends Component {
     this.state = {
       'registrationInputs': {
         'email': '',
+        'name': '',
         'password': '',
       },
       'loginInputs': {
@@ -77,10 +78,10 @@ class UserLoginBlock extends Component {
 
     // this.setState({ messages: { errors: {} } });
 
-    const {email, password} = this.state.registrationInputs;
+    const {email, name, password} = this.state.registrationInputs;
 
     // Register the user, then log them in
-    createRemoteUser(email, password)
+    createRemoteUser(email, name, password)
       .then(result => this.loginUser(email, password))
       .catch(error => console.log(error.response));
   }
