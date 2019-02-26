@@ -65,6 +65,52 @@ class EditablePlacesVisitedMap extends Component {
     }
   }
 
+  createPlaceMapForUserID(userID) {
+    const placemap = this.state.placemap;
+
+    // TODO - handle errors
+    return createRemotePlaceMap(userID, placemap.placesVisited)
+      .then(result => {
+        this.setState({
+          placemap: {
+            ...placemap,
+            id: result.data.id,
+          }
+        });
+        return result.data;
+      })
+      .catch(error => console.log(error));
+  }
+
+  fetchPlaceMapByID(placemapID) {
+    // TODO - handle errors
+    return fetchRemotePlaceMap(placemapID)
+      .then(result => {
+        this.setState({
+          placemap: {
+            id: result.data.id,  // prob redundant, but might as well set
+            placesVisited: result.data.places
+          }
+        });
+        return result.data;
+      });
+  }
+
+  fetchUserByID(userID) {
+    // TODO - handle errors
+    return fetchRemoteUser(userID)
+      .then(result => {
+        this.setState({
+          user: {
+            id: result.data.id,
+            email: result.data.email,
+            name: result.data.name
+          }
+        })
+        return result.data;
+      });
+  }
+
   handlePlaceRowChange(event) {
     const { placemap } = this.state;
     const placeID = Number(event.target.value);
@@ -113,52 +159,6 @@ class EditablePlacesVisitedMap extends Component {
         })
         .catch(error => console.log(error));
     }
-  }
-
-  createPlaceMapForUserID(userID) {
-    const placemap = this.state.placemap;
-
-    // TODO - handle errors
-    return createRemotePlaceMap(userID, placemap.placesVisited)
-      .then(result => {
-        this.setState({
-          placemap: {
-            ...placemap,
-            id: result.data.id,
-          }
-        });
-        return result.data;
-      })
-      .catch(error => console.log(error));
-  }
-
-  fetchPlaceMapByID(placemapID) {
-    // TODO - handle errors
-    return fetchRemotePlaceMap(placemapID)
-      .then(result => {
-        this.setState({
-          placemap: {
-            id: result.data.id,  // prob redundant, but might as well set
-            placesVisited: result.data.places
-          }
-        });
-        return result.data;
-      });
-  }
-
-  fetchUserByID(userID) {
-    // TODO - handle errors
-    return fetchRemoteUser(userID)
-      .then(result => {
-        this.setState({
-          user: {
-            id: result.data.id,
-            email: result.data.email,
-            name: result.data.name
-          }
-        })
-        return result.data;
-      });
   }
 
   toggleUserLoggedIn() {
