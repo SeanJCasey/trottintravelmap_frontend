@@ -5,6 +5,7 @@ import decode from 'jwt-decode';
 import { createRemotePlaceMap, fetchRemotePlaceMap, fetchRemotePlaces,
          fetchRemoteUser, updateRemotePlaceMap } from '../apiRouters';
 import FilterablePlaces from './FilterablePlaces';
+import MessagesBlock from '../components/MessagesBlock';
 import PlacesVisitedMap from '../components/PlacesVisitedMap';
 import StatBlocksRow from '../components/StatBlocksRow';
 import UserAccountOptionsBlock from '../components/UserAccountOptionsBlock';
@@ -18,7 +19,12 @@ class EditablePlacesVisitedMap extends Component {
 
     this.state = {
       ...this.constructInitialUserState(),
-      placesLoaded: false
+      placesLoaded: false,
+      messages: {
+        errors: [],
+        warnings: [],
+        successes: []
+      },
     };
 
     this.places = [];
@@ -183,7 +189,7 @@ class EditablePlacesVisitedMap extends Component {
   }
 
   render() {
-    const { placemap, user } = this.state;
+    const { placemap, user, messages } = this.state;
     const { places, placesByRegion, statsTotal } = this;
 
     // Associate placesVisited IDs with their places for stat calcs
@@ -208,6 +214,9 @@ class EditablePlacesVisitedMap extends Component {
               <h1>{user.name}'s Travel Map</h1> :
               <h1>Fill In Your Travel Map</h1>
             }
+            <MessagesBlock
+              messages={messages}
+            />
             {user.id &&
               <UserAccountOptionsBlock
                 userName={user.name}
