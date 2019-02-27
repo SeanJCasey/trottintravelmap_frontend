@@ -21,9 +21,9 @@ class EditablePlacesVisitedMap extends Component {
       ...this.constructInitialUserState(),
       placesLoaded: false,
       messages: {
-        errors: [],
-        warnings: [],
-        successes: []
+        error: [],
+        warning: [],
+        success: []
       },
     };
 
@@ -31,6 +31,7 @@ class EditablePlacesVisitedMap extends Component {
     this.placesByRegion = {};
     this.statsTotal = {};
 
+    this.addSystemMessage = this.addSystemMessage.bind(this);
     this.handlePlaceRowChange = this.handlePlaceRowChange.bind(this);
     this.fetchPlaceMapByID = this.fetchPlaceMapByID.bind(this);
     this.fetchUserByID = this.fetchUserByID.bind(this);
@@ -52,6 +53,21 @@ class EditablePlacesVisitedMap extends Component {
         email: null
       }
     };
+  }
+
+  addSystemMessage(text, messageType) {
+    if (!this.state.messages[messageType]) { return; }
+
+    const newMessages = this.state.messages[messageType].slice();
+    if (!newMessages.includes(text)) {
+      newMessages.push(text);
+      this.setState({
+        messages: {
+          ...this.state.messages,
+          [messageType]: newMessages
+        }
+      });
+    }
   }
 
   componentDidMount() {
@@ -168,7 +184,7 @@ class EditablePlacesVisitedMap extends Component {
   }
 
   toggleUserLoggedIn() {
-    this.setUserFromStorageToken()
+    this.setUserFromStorageToken();
   }
 
   unsetUser() {
@@ -235,6 +251,7 @@ class EditablePlacesVisitedMap extends Component {
         {!user.id &&
           <UserLoginBlock
             toggleUserLoggedIn={this.toggleUserLoggedIn}
+            addSystemMessage={this.addSystemMessage}
           />
         }
       </div>

@@ -82,7 +82,13 @@ class UserLoginBlock extends Component {
 
     // Register the user, then log them in
     createRemoteUser(email, name, password)
-      .then(result => this.loginUser(email, password))
+      .then(result => {
+        this.props.addSystemMessage(
+          `Your user account for ${email} has been saved!`,
+          'success'
+        );
+        this.loginUser(email, password);
+      })
       .catch(error => console.log(error.response));
   }
 

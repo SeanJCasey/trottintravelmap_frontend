@@ -1,9 +1,9 @@
 import React from 'react';
 
 const ALERTCLASSMAP = {
-  'errors': 'alert-danger',
-  'warnings': 'alert-warning',
-  'successes': 'alert-success'
+  'error': 'alert-danger',
+  'warning': 'alert-warning',
+  'success': 'alert-success'
 }
 
 const MessagesBlock = ({ messages }) =>
