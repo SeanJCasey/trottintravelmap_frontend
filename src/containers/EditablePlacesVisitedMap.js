@@ -115,7 +115,6 @@ class EditablePlacesVisitedMap extends Component {
     const { placemap } = this.state;
     const placeID = Number(event.target.value);
     let placesVisited = placemap.placesVisited.slice();
-
     if (placesVisited.includes(placeID)) {
       placesVisited = placesVisited.filter(item => item !== placeID);
     }
@@ -126,6 +125,7 @@ class EditablePlacesVisitedMap extends Component {
     // Update state with new placesVisited and also update the remote db
     this.setState({
       placemap: {
+        ...this.state.placemap,
         placesVisited: placesVisited
       }
     });
