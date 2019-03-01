@@ -33,7 +33,8 @@ class EditablePlacesVisitedMap extends Component {
 
     this.addSystemMessage = this.addSystemMessage.bind(this);
     this.handlePlaceRowChange = this.handlePlaceRowChange.bind(this);
-    this.fetchPlaceMapByID = this.fetchPlaceMapByID.bind(this);
+    // this.fetchPlaceMapByID = this.fetchPlaceMapByID.bind(this);
+    this.fetchPlaceMapByUserSlug = this.fetchPlaceMapByUserSlug.bind(this);
     this.fetchUserByID = this.fetchUserByID.bind(this);
     this.handleUserLogout = this.handleUserLogout.bind(this);
     this.setUserFromStorageToken = this.setUserFromStorageToken.bind(this);
@@ -45,7 +46,10 @@ class EditablePlacesVisitedMap extends Component {
     return {
       placemap: {
         id: null,
-        placesVisited: []
+        placesVisited: [],
+        owner: {
+          name: ''
+        }
       },
       user: {
         id: null,
@@ -71,6 +75,13 @@ class EditablePlacesVisitedMap extends Component {
   }
 
   componentDidMount() {
+    // If there is a user slug, load the placemap
+    // TODO - redirect if no user at attempted url
+    if (this.props.match.params.userSlug) {
+      console.log('yess');
+      this.fetchPlaceMapByUserSlug(this.props.match.params.userSlug);
+    }
+
     // Set component level vars based on Places, which are unchanging
     fetchRemotePlaces()
       .then(result => {
@@ -97,6 +108,9 @@ class EditablePlacesVisitedMap extends Component {
           placemap: {
             ...placemap,
             id: result.data.id,
+            owner: {
+              name: result.data.user.name
+            }
           }
         });
         return result.data;
@@ -104,14 +118,31 @@ class EditablePlacesVisitedMap extends Component {
       .catch(error => console.log(error));
   }
 
-  fetchPlaceMapByID(placemapID) {
+  // fetchPlaceMapByID(placemapID) {
+  //   // TODO - handle errors
+  //   return fetchRemotePlaceMap(placemapID)
+  //     .then(result => {
+  //       this.setState({
+  //         placemap: {
+  //           id: result.data.id,
+  //           placesVisited: result.data.places
+  //         }
+  //       });
+  //       return result.data;
+  //     });
+  // }
+
+  fetchPlaceMapByUserSlug(userSlug) {
     // TODO - handle errors
-    return fetchRemotePlaceMap(placemapID)
+    return fetchRemotePlaceMap(userSlug)
       .then(result => {
         this.setState({
           placemap: {
-            id: result.data.id,  // prob redundant, but might as well set
-            placesVisited: result.data.places
+            id: result.data.id,
+            placesVisited: result.data.places,
+            owner: {
+              name: result.data.user.name,
+            }
           }
         });
         return result.data;
@@ -171,14 +202,17 @@ class EditablePlacesVisitedMap extends Component {
       const decoded = decode(jwtToken);
       // Fetch User data first to ensure JWT validity and get fields
       this.fetchUserByID(decoded.user_id)
-        .then(user => {
-          if (user.placemap) {
-            this.fetchPlaceMapByID(user.placemap);
-          }
-          else {
-            this.createPlaceMapForUserID(user.id);
-          }
-        })
+        // .then(user => {
+        //   // Redirect to their placemap page
+        //   // 1. if they are on their own page, stay there but show map
+        //   // 2. if they are on another page, redirect
+        //   if (user.placemap) {
+        //     this.fetchPlaceMapByUserSlug(user.placemap);
+        //   }
+        //   else {
+        //     this.createPlaceMapForUserID(user.id);
+        //   }
+        // })
         .catch(error => console.log(error));
     }
   }
@@ -226,8 +260,8 @@ class EditablePlacesVisitedMap extends Component {
         />
         <div className="main-content-wrapper">
           <div className="container">
-            {user.id ?
-              <h1>{user.name}'s Travel Map</h1> :
+            {placemap.owner.name ?
+              <h1>{placemap.owner.name}'s Travel Map</h1> :
               <h1>Fill In Your Travel Map</h1>
             }
             <MessagesBlock

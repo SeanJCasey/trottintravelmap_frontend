@@ -16,8 +16,8 @@ const URL_LOGIN = `${PATH_BASE}${PATH_LOGIN}`;
 const URL_REGISTER = URL_USERS;
 
 
-export function fetchRemotePlaceMap(placemapID) {
-  const url = `${URL_PLACEMAPS}/${placemapID}`;
+export function fetchRemotePlaceMap(userSlug) {
+  const url = `${URL_PLACEMAPS}/${userSlug}`;
 
   return axios.get(url);
 }
