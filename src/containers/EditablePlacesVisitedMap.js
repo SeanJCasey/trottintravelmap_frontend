@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import decode from 'jwt-decode';
 
 import { createRemotePlaceMap, fetchRemotePlaceMap, fetchRemotePlaces,
-         fetchRemoteUser, updateRemotePlaceMap } from '../apiRouters';
+         updateRemotePlaceMap } from '../apiRouters';
 import FilterablePlaces from './FilterablePlaces';
 import MessagesBlock from '../components/MessagesBlock';
 import PlacesVisitedMap from '../components/PlacesVisitedMap';
@@ -18,7 +16,7 @@ class EditablePlacesVisitedMap extends Component {
     super(props);
 
     this.state = {
-      ...this.constructInitialUserState(),
+      ...this.constructInitialPlacemapState(),
       placesLoaded: false,
       messages: {
         error: [],
@@ -33,16 +31,11 @@ class EditablePlacesVisitedMap extends Component {
 
     this.addSystemMessage = this.addSystemMessage.bind(this);
     this.handlePlaceRowChange = this.handlePlaceRowChange.bind(this);
-    // this.fetchPlaceMapByID = this.fetchPlaceMapByID.bind(this);
     this.fetchPlaceMapByUserSlug = this.fetchPlaceMapByUserSlug.bind(this);
-    this.fetchUserByID = this.fetchUserByID.bind(this);
-    this.handleUserLogout = this.handleUserLogout.bind(this);
-    this.setUserFromStorageToken = this.setUserFromStorageToken.bind(this);
-    this.toggleUserLoggedIn = this.toggleUserLoggedIn.bind(this);
     this.updateRemotePlacesVisited = this.updateRemotePlacesVisited.bind(this);
   }
 
-  constructInitialUserState() {
+  constructInitialPlacemapState() {
     return {
       placemap: {
         id: null,
@@ -51,11 +44,6 @@ class EditablePlacesVisitedMap extends Component {
           name: ''
         }
       },
-      user: {
-        id: null,
-        name: null,
-        email: null
-      }
     };
   }
 
@@ -78,7 +66,6 @@ class EditablePlacesVisitedMap extends Component {
     // If there is a user slug, load the placemap
     // TODO - redirect if no user at attempted url
     if (this.props.match.params.userSlug) {
-      console.log('yess');
       this.fetchPlaceMapByUserSlug(this.props.match.params.userSlug);
     }
 
@@ -91,11 +78,6 @@ class EditablePlacesVisitedMap extends Component {
       })
       .then(() => this.setState({ placesLoaded: true }))
       .catch(error => this.setState({ error }));
-
-    // If there is a JWT Token in storage, set user and their placemap
-    if (localStorage.getItem('jwtToken')) {
-      this.setUserFromStorageToken();
-    }
   }
 
   createPlaceMapForUserID(userID) {
@@ -118,20 +100,6 @@ class EditablePlacesVisitedMap extends Component {
       .catch(error => console.log(error));
   }
 
-  // fetchPlaceMapByID(placemapID) {
-  //   // TODO - handle errors
-  //   return fetchRemotePlaceMap(placemapID)
-  //     .then(result => {
-  //       this.setState({
-  //         placemap: {
-  //           id: result.data.id,
-  //           placesVisited: result.data.places
-  //         }
-  //       });
-  //       return result.data;
-  //     });
-  // }
-
   fetchPlaceMapByUserSlug(userSlug) {
     // TODO - handle errors
     return fetchRemotePlaceMap(userSlug)
@@ -145,21 +113,6 @@ class EditablePlacesVisitedMap extends Component {
             }
           }
         });
-        return result.data;
-      });
-  }
-
-  fetchUserByID(userID) {
-    // TODO - handle errors
-    return fetchRemoteUser(userID)
-      .then(result => {
-        this.setState({
-          user: {
-            id: result.data.id,
-            email: result.data.email,
-            name: result.data.name
-          }
-        })
         return result.data;
       });
   }
@@ -187,51 +140,6 @@ class EditablePlacesVisitedMap extends Component {
     }
   }
 
-  handleUserLogout() {
-    this.unsetUser();
-  }
-
-  setUserFromStorageToken() {
-    if (localStorage.getItem('jwtToken')) {
-      const jwtToken = localStorage.getItem('jwtToken');
-
-      // Set default Auth token for all requests
-      axios.defaults.headers.common["Authorization"] = `JWT ${jwtToken}`;
-
-      // Set user and placemap states
-      const decoded = decode(jwtToken);
-      // Fetch User data first to ensure JWT validity and get fields
-      this.fetchUserByID(decoded.user_id)
-        // .then(user => {
-        //   // Redirect to their placemap page
-        //   // 1. if they are on their own page, stay there but show map
-        //   // 2. if they are on another page, redirect
-        //   if (user.placemap) {
-        //     this.fetchPlaceMapByUserSlug(user.placemap);
-        //   }
-        //   else {
-        //     this.createPlaceMapForUserID(user.id);
-        //   }
-        // })
-        .catch(error => console.log(error));
-    }
-  }
-
-  toggleUserLoggedIn() {
-    this.setUserFromStorageToken();
-  }
-
-  unsetUser() {
-    // Remove JWT from local storage
-    localStorage.removeItem('jwtToken');
-
-    // Remove JWT from axios header
-    delete axios.defaults.headers.common["Authorization"];
-
-    // Reset state to initial conditions
-    this.setState(this.constructInitialUserState());
-  }
-
   updateRemotePlacesVisited(placesVisited) {
     // TODO - handle errors
     return updateRemotePlaceMap(this.state.placemap.id, placesVisited)
@@ -239,8 +147,11 @@ class EditablePlacesVisitedMap extends Component {
   }
 
   render() {
-    const { placemap, user, messages } = this.state;
+    const { user } = this.props;
+    const { placemap, messages } = this.state;
     const { places, placesByRegion, statsTotal } = this;
+
+    console.log(this.props.match.path);
 
     // Associate placesVisited IDs with their places for stat calcs
     // TODO - Re-do check to make sure places is not empty array
@@ -270,7 +181,7 @@ class EditablePlacesVisitedMap extends Component {
             {user.id &&
               <UserAccountOptionsBlock
                 userName={user.name}
-                onUserLogout={this.handleUserLogout}
+                onUserLogout={this.props.logoutUser}
               />}
             <StatBlocksRow
               statsTotal={statsTotal}
@@ -282,12 +193,11 @@ class EditablePlacesVisitedMap extends Component {
             />
           </div>
         </div>
-        {!user.id &&
-          <UserLoginBlock
-            toggleUserLoggedIn={this.toggleUserLoggedIn}
-            addSystemMessage={this.addSystemMessage}
-          />
-        }
+        <UserLoginBlock
+          setUser={this.props.setUser}
+          addSystemMessage={this.addSystemMessage}
+          user={this.props.user}
+        />
       </div>
     );
   }

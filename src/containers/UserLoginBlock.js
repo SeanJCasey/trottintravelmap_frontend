@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Redirect } from "react-router-dom";
 
 import { createRemoteUser, fetchRemoteUserAuthToken } from '../apiRouters';
 import UserLoginForm from '../components/UserLoginForm';
 import UserRegistrationForm from '../components/UserRegistrationForm';
+
+const PATH_MAPS = '/travel-maps';
 
 
 class UserLoginBlock extends Component {
@@ -18,11 +21,12 @@ class UserLoginBlock extends Component {
       'loginInputs': {
         'email': '',
         'password': '',
-      }
+      },
+      redirectUserHome: false,
       // 'messages': {
       //   'errors': {},
       //   'successes': []
-      // },
+      // }
     }
     // this.handleAPIError = this.handleAPIError.bind(this);
     this.handleLoginInputChange = this.handleLoginInputChange.bind(this);
@@ -98,21 +102,24 @@ class UserLoginBlock extends Component {
       .then(result => {
         // Set JWT in localStorage
         localStorage.setItem('jwtToken', result.data.token);
-        // Signal to parent component that user has logged in
-        this.props.toggleUserLoggedIn();
-        // this.setState({
-        //   'messages': {
-        //     'successes': [
-        //       ...this.state.messages.successes,
-        //       "User saved!"
-        //     ]
-        //   }
-        // });
       })
-      .catch(error => console.log(error.response));
+      .then(() => this.props.setUser())
+      .then(() => this.setState({ redirectUserHome: true }))
+      .catch(error => console.log(error));
   }
 
   render() {
+    const { redirectUserHome } = this.state;
+    const { user } = this.props;
+
+    // Redirect the user home if they have just logged in.
+    if (redirectUserHome && user.slug) {
+      const redirectPath = `${PATH_MAPS}/${user.slug}`;
+      console.log(redirectPath);
+      return <Redirect to={redirectPath} />;
+    }
+    // Don't render anything if the user is logged in.
+    if (user.id) return null;
 
     let messageAlerts = []
     // const { errors } = this.state.messages;
