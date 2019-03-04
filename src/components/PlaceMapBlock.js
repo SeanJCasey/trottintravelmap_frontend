@@ -3,7 +3,7 @@ import React from 'react';
 import Worldmap from './Worldmap';
 
 
-const PlacesVisitedMap = ({ places, visitedPlaces }) =>
+const PlaceMapBlock = ({ places, visitedPlaces }) =>
   <div className="worldmap">
     <div className="container">
       <div className="worldmap-wrapper">
@@ -15,4 +15,4 @@ const PlacesVisitedMap = ({ places, visitedPlaces }) =>
     </div>
   </div>
 
-export default PlacesVisitedMap;
+export default PlaceMapBlock;

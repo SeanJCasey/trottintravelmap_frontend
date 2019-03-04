@@ -4,7 +4,7 @@ import { createRemotePlaceMap, fetchRemotePlaceMap, fetchRemotePlaces,
          updateRemotePlaceMap } from '../apiRouters';
 import FilterablePlaces from './FilterablePlaces';
 import MessagesBlock from '../components/MessagesBlock';
-import PlacesVisitedMap from '../components/PlacesVisitedMap';
+import PlaceMapBlock from '../components/PlaceMapBlock';
 import StatBlocksRow from '../components/StatBlocksRow';
 import UserAccountOptionsBlock from '../components/UserAccountOptionsBlock';
 import UserLoginBlock from './UserLoginBlock';
@@ -165,7 +165,7 @@ class EditablePlacesVisitedMap extends Component {
 
     return (
       <div className="traveler-map">
-        <PlacesVisitedMap
+        <PlaceMapBlock
           places={places}
           visitedPlaces={placemap.placesVisited}
         />
