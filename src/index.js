@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import App from './containers/App'
 import * as serviceWorker from './serviceWorker';
 
+import 'font-awesome/css/font-awesome.min.css'
 import 'react-circular-progressbar/dist/styles.css';
 import './App.scss';
 
