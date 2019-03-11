@@ -19,37 +19,44 @@ const URL_REGISTER = URL_USERS;
 export function fetchRemotePlaceMap(userSlug) {
   const url = `${URL_PLACEMAPS}/${userSlug}`;
 
-  return axios.get(url);
+  return axios.get(url)
+    .catch(error => console.log(error.response));
 }
 
 export function fetchRemotePlaces() {
-  return axios.get(URL_PLACES);
+  return axios.get(URL_PLACES)
+    .catch(error => console.log(error.response));
 }
 
 export function fetchRemoteUser(userID) {
   const url = `${URL_USERS}/${userID}`;
 
-  return axios.get(url);
+  return axios.get(url)
+    .catch(error => console.log(error.response));
 }
 
 export function fetchRemoteUserAuthToken(email, password) {
   return axios.post(URL_LOGIN, {email, password})
+    .catch(error => console.log(error.response));
 }
 
 export function createRemotePlaceMap(userID, placesVisited) {
   const url = `${URL_PLACEMAPS}`;
   const body = { user: userID, places: placesVisited };
 
-  return axios.post(url, body);
+  return axios.post(url, body)
+    .catch(error => console.log(error.response));
 }
 
 export function createRemoteUser(email, name, password) {
-  return axios.post(URL_REGISTER, {email, name, password});
+  return axios.post(URL_REGISTER, {email, name, password})
+    .catch(error => console.log(error.response));
 }
 
 export function updateRemotePlaceMap(placemapID, placesVisited) {
   const url = `${URL_PLACEMAPS}/${placemapID}`;
   const body = { places: placesVisited };
 
-  return axios.patch(url, body);
+  return axios.patch(url, body)
+    .catch(error => console.log(error.response));
 }
