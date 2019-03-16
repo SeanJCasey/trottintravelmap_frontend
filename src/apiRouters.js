@@ -16,6 +16,10 @@ const URL_LOGIN = `${PATH_BASE}${PATH_LOGIN}`;
 const URL_REGISTER = URL_USERS;
 
 
+// function handleTokenAuthError(error) {
+//   console.log(error);
+// }
+
 export function fetchRemotePlaceMap(userSlug) {
   const url = `${URL_PLACEMAPS}/${userSlug}`;
 
@@ -42,7 +46,7 @@ export function fetchRemoteUserAuthToken(email, password) {
 
 export function createRemotePlaceMap(userID, placesVisited) {
   const url = `${URL_PLACEMAPS}`;
-  const body = { user: userID, places: placesVisited };
+  const body = { user_id: userID, places: placesVisited };
 
   return axios.post(url, body)
     .catch(error => console.log(error.response));
@@ -53,8 +57,8 @@ export function createRemoteUser(email, name, password) {
     .catch(error => console.log(error.response));
 }
 
-export function updateRemotePlaceMap(placemapID, placesVisited) {
-  const url = `${URL_PLACEMAPS}/${placemapID}`;
+export function updateRemotePlaceMap(userSlug, placesVisited) {
+  const url = `${URL_PLACEMAPS}/${userSlug}`;
   const body = { places: placesVisited };
 
   return axios.patch(url, body)
