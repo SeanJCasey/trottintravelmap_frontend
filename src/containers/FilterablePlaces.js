@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 
+import PlacesForm from '../components/PlacesForm'
 import PlacesList from '../components/PlacesList'
 import RegionsFilter from '../components/RegionsFilter'
 
@@ -38,14 +39,21 @@ class FilterablePlaces extends Component {
             />
           </div>
           <div className="col-sm-7 col-md-8">
-            <form className="places-form">
-              <PlacesList
+            {this.props.editable &&
+              <PlacesForm
                 placesByRegion={this.props.placesByRegion}
                 visitedPlaces={this.props.visitedPlaces}
                 onPlaceRowChange={this.props.onPlaceRowChange}
                 filters={this.state.filters}
               />
-            </form>
+            }
+            {!this.props.editable &&
+              <PlacesList
+                placesByRegion={this.props.placesByRegion}
+                visitedPlaces={this.props.visitedPlaces}
+                filters={this.state.filters}
+              />
+            }
           </div>
         </div>
       </div>

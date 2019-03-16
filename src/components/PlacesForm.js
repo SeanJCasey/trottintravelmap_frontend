@@ -1,11 +1,10 @@
 import React from 'react';
 import { slugifyString } from '../utils';
 
-import PlaceVisitedRow from './PlaceVisitedRow';
+import PlaceVisitedInputRow from './PlaceVisitedInputRow';
 
-const PlacesList = ({ placesByRegion, visitedPlaces, filters }) =>
-  <div className="places-list">
-
+const PlacesForm = ({ placesByRegion, visitedPlaces, onPlaceRowChange, filters }) =>
+  <form className="places-form">
     {Object.keys(placesByRegion).map((region, i) =>
       <div className="region"
            id={slugifyString(region)}
@@ -16,16 +15,16 @@ const PlacesList = ({ placesByRegion, visitedPlaces, filters }) =>
         <ul className="list-unstyled">
           {placesByRegion[region].map(place =>
             // TODO: Need logic for non logged-in users to view somebody else's map.
-            <PlaceVisitedRow
+            <PlaceVisitedInputRow
               place={place}
               visited={visitedPlaces.includes(place.id) ? true : false}
               key={place.id}
+              onChange={onPlaceRowChange}
             />
           )}
         </ul>
       </div>
     )}
+  </form>
 
-  </div>
-
-export default PlacesList;
+export default PlacesForm;

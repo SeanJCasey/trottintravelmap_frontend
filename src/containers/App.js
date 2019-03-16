@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import axios from 'axios';
 import decode from 'jwt-decode';
 
 import { fetchRemoteUser } from '../apiRouters';
-import EditablePlacesVisitedMap from './EditablePlacesVisitedMap';
+import PlacesVisitedMap from './PlacesVisitedMap';
 
 
 class App extends Component {
@@ -13,7 +13,8 @@ class App extends Component {
     super(props);
 
     this.state = {
-      ...this.constructInitialUserState()
+      user: this.constructInitialUserState(),
+      initialUserStateLoaded: false
     };
 
     this.fetchUserByID = this.fetchUserByID.bind(this);
@@ -24,17 +25,21 @@ class App extends Component {
 
   constructInitialUserState() {
     return {
-      user: {
-        id: null,
-        name: null,
-        email: null,
-        slug: null
-      }
+      id: null,
+      name: null,
+      email: null,
+      slug: null
     };
   }
 
   componentDidMount() {
-    this.setUser();
+    if (localStorage.getItem('jwtToken')) {
+      this.setUser()
+        .then(() => this.setState({ initialUserStateLoaded: true }));
+    }
+    // else {
+    //   this.setState({ initialUserStateLoaded: true });
+    // }
   }
 
   fetchUserByID(userID) {
@@ -64,18 +69,16 @@ class App extends Component {
   }
 
   setUser() {
-    if (localStorage.getItem('jwtToken')) {
-      const jwtToken = localStorage.getItem('jwtToken');
+    const jwtToken = localStorage.getItem('jwtToken');
 
-      // Set default Auth token for all requests
-      axios.defaults.headers.common["Authorization"] = `JWT ${jwtToken}`;
+    // Set default Auth token for all requests
+    axios.defaults.headers.common["Authorization"] = `JWT ${jwtToken}`;
 
-      // Set user info in state
-      // TODO - if Auth error, unset user
-      const decoded = decode(jwtToken);
-      return this.fetchUserByID(decoded.user_id)
-        .catch(error => console.log(error));
-    }
+    // Fetch remote user
+    // TODO - if Auth error, unset user
+    const decoded = decode(jwtToken);
+    return this.fetchUserByID(decoded.user_id)
+      .catch(error => console.log(error));
   }
 
   unsetUser() {
@@ -86,7 +89,7 @@ class App extends Component {
     delete axios.defaults.headers.common["Authorization"];
 
     // Reset state to initial conditions
-    this.setState(this.constructInitialUserState());
+    this.setState({ user: this.constructInitialUserState() });
   }
 
   render() {
@@ -95,29 +98,30 @@ class App extends Component {
     return (
       <Router>
         <div className="app-wrapper">
+          <div>
+            <Link to={'/'} className="btn btn-default">TripPlot</Link>
+          </div>
           <Route
             path='/'
             exact
-            // component={EditablePlacesVisitedMap}
             render={(props) =>
-              <EditablePlacesVisitedMap
+              <PlacesVisitedMap
                 {...props}
                 user={user}
                 setUser={this.setUser}
                 logoutUser={this.handleLogoutUser}
-                unsetUser={this.unsetUser}
+                editable={true}
               />}
           />
           <Route
             path='/travel-maps/:userSlug'
-            // component={EditablePlacesVisitedMap}
             render={(props) =>
-              <EditablePlacesVisitedMap
+              <PlacesVisitedMap
                 {...props}
                 user={user}
                 setUser={this.setUser}
                 logoutUser={this.handleLogoutUser}
-                unsetUser={this.unsetUser}
+                editable={false}
               />}
           />
         </div>

@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Redirect } from "react-router-dom";
+// import { Redirect } from "react-router-dom";
+import axios from 'axios';
 
-import { createRemoteUser, fetchRemoteUserAuthToken } from '../apiRouters';
+import { createRemotePlaceMap, createRemoteUser,
+         fetchRemoteUserAuthToken } from '../apiRouters';
 import UserLoginForm from '../components/UserLoginForm';
 import UserRegistrationForm from '../components/UserRegistrationForm';
 
-const PATH_MAPS = '/travel-maps';
+// const PATH_MAPS = '/travel-maps';
 
 
 class UserLoginBlock extends Component {
@@ -22,17 +24,13 @@ class UserLoginBlock extends Component {
         'email': '',
         'password': '',
       },
-      redirectUserHome: false,
-      // 'messages': {
-      //   'errors': {},
-      //   'successes': []
-      // }
     }
+
     // this.handleAPIError = this.handleAPIError.bind(this);
     this.handleLoginInputChange = this.handleLoginInputChange.bind(this);
     this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
+    this.handleMapRegistrationSubmit = this.handleMapRegistrationSubmit.bind(this);
     this.handleRegistrationInputChange = this.handleRegistrationInputChange.bind(this);
-    this.handleRegistrationSubmit = this.handleRegistrationSubmit.bind(this);
   }
 
   // handleAPIError(result) {
@@ -50,6 +48,62 @@ class UserLoginBlock extends Component {
   //   this.setState({ messages: { errors: newErrors } });
   // }
 
+
+  // Map Registration pipeline:
+  // 1. Create Remote User
+  // 2. Get JWT from Remote (log in)
+  // 3. Set JWT in browser
+  // 4. Set JWT in axios headers
+  // 5. Create Remote PlaceMap
+  // 6. Update App user state
+  handleMapRegistrationSubmit(event) {
+    event.preventDefault();
+
+    // this.setState({ messages: { errors: {} } });
+
+    const { email, name, password } = this.state.registrationInputs;
+    const { placesVisited } = this.props;
+
+    // Register the user, log them in, and create their placemap
+    createRemoteUser(email, name, password)
+      .then(result => {
+        const user = result.data;
+        this.props.addSystemMessage(
+          `Your user account for ${email} has been saved!`,
+          'success'
+        );
+        // Get JWT from API
+        fetchRemoteUserAuthToken(email, password)
+          .then(result => {
+            const jwtToken = result.data.token;
+            // Set JWT in localStorage
+            localStorage.setItem('jwtToken', jwtToken);
+            // Set default Auth token for all requests
+            axios.defaults.headers.common["Authorization"] = `JWT ${jwtToken}`;
+            // Create Remote PlaceMap
+            createRemotePlaceMap(user.id, placesVisited)
+              // Update App state with local storage user
+              .then(() => {
+                this.props.addSystemMessage(
+                  `Your map has been saved!`,
+                  'success'
+                );
+                this.props.setUser();
+              });
+          })
+
+          // Display special error if pipeline breaks
+          .catch(error => {
+            console.log(error);
+            this.props.addSystemMessage(
+              `Could not save map. Please contact an admin.`,
+              'error'
+            );
+          });
+      })
+      .catch(error => console.log(error));
+  }
+
   handleLoginInputChange(event) {
     this.setState({
       loginInputs: {
@@ -65,7 +119,13 @@ class UserLoginBlock extends Component {
     // this.setState({ messages: { errors: {} } });
 
     const {email, password} = this.state.loginInputs;
-    this.loginUser(email, password);
+    fetchRemoteUserAuthToken(email, password)
+      .then(result => {
+        // Set JWT in localStorage
+        localStorage.setItem('jwtToken', result.data.token);
+      })
+      .then(() => this.props.setUser())
+      .catch(error => console.log(error));
   }
 
   handleRegistrationInputChange(event) {
@@ -77,80 +137,15 @@ class UserLoginBlock extends Component {
     });
   }
 
-  handleRegistrationSubmit(event) {
-    event.preventDefault();
-
-    // this.setState({ messages: { errors: {} } });
-
-    const {email, name, password} = this.state.registrationInputs;
-
-    // Register the user, then log them in
-    createRemoteUser(email, name, password)
-      .then(result => {
-        this.props.addSystemMessage(
-          `Your user account for ${email} has been saved!`,
-          'success'
-        );
-        this.loginUser(email, password);
-      })
-      .catch(error => console.log(error.response));
-  }
-
-  loginUser(email, password) {
-    // Retrieve and set a JWT for the user
-    fetchRemoteUserAuthToken(email, password)
-      .then(result => {
-        // Set JWT in localStorage
-        localStorage.setItem('jwtToken', result.data.token);
-      })
-      .then(() => this.props.setUser())
-      .then(() => this.setState({ redirectUserHome: true }))
-      .catch(error => console.log(error));
-  }
-
   render() {
-    const { redirectUserHome } = this.state;
-    const { user } = this.props;
-
-    // Redirect the user home if they have just logged in.
-    if (redirectUserHome && user.slug) {
-      const redirectPath = `${PATH_MAPS}/${user.slug}`;
-      console.log(redirectPath);
-      return <Redirect to={redirectPath} />;
-    }
-    // Don't render anything if the user is logged in.
-    if (user.id) return null;
-
-    let messageAlerts = []
-    // const { errors } = this.state.messages;
-    // let errorAlerts = []
-    // Object.keys(errors).forEach((category, index1) => {
-    //   errors[category].forEach((message, index2) =>
-    //     errorAlerts.push(
-    //       <div
-    //         className="alert alert-danger"
-    //         key={`${index1}-${index2}`}
-    //       >
-    //         {category}: {message}
-    //       </div>
-    //     )
-    //   )
-    // });
-    // messageAlerts = [
-    //   ...errorAlerts,
-    // ];
-
     return (
       <div className="user-login-wrapper">
         <div className="container">
-          <div className="messages">
-            {messageAlerts}
-          </div>
           <div className="row">
             <div className="col-sm-8">
               <h2>Save this Map</h2>
               <UserRegistrationForm
-                onSubmit={this.handleRegistrationSubmit}
+                onSubmit={this.handleMapRegistrationSubmit}
                 onInputChange={this.handleRegistrationInputChange}
               />
             </div>

@@ -94,7 +94,8 @@ body {
         }
       }
     }
-    .place-list {
+    .places-list,
+    .places-form {
       .place {
         padding-right: 20px;
         width: 50%;
@@ -103,6 +104,12 @@ body {
         margin-bottom: 2px;
         input {
           margin-right: 5px;
+        }
+        &.not-visited {
+          @extend .text-muted;
+        }
+        &.visited {
+          color: $success;
         }
       }
     }
