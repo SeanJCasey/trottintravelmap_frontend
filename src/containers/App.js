@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import axios from 'axios';
 import decode from 'jwt-decode';
 
 import { fetchRemoteUser } from '../apiRouters';
+import Navbar from '../components/Navbar';
 import PlacesVisitedMap from './PlacesVisitedMap';
 
 
@@ -98,9 +99,10 @@ class App extends Component {
     return (
       <Router>
         <div className="app-wrapper">
-          <div>
-            <Link to={'/'} className="btn btn-default">TripPlot</Link>
-          </div>
+          <Navbar
+            user={user}
+            onUserLogout={this.handleLogoutUser}
+          />
           <Route
             path='/'
             exact
@@ -109,7 +111,6 @@ class App extends Component {
                 {...props}
                 user={user}
                 setUser={this.setUser}
-                logoutUser={this.handleLogoutUser}
                 editable={true}
               />}
           />
@@ -120,7 +121,6 @@ class App extends Component {
                 {...props}
                 user={user}
                 setUser={this.setUser}
-                logoutUser={this.handleLogoutUser}
                 editable={false}
               />}
           />

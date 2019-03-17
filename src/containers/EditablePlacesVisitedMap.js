@@ -110,7 +110,6 @@ class EditablePlacesVisitedMap extends Component {
               <UserAccountOptionsBlock
                 mapUrl={`${PATH_BASE}${PATH_MAPS}/${user.slug}`}
                 userName={user.name}
-                onUserLogout={this.props.logoutUser}
               />}
             <StatBlocksRow
               statsTotal={statsTotal}

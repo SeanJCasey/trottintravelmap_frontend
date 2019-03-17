@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-const UserAccountOptionsBlock = ({ mapUrl, userName, onUserLogout }) =>
+const UserAccountOptionsBlock = ({ mapUrl, userName }) =>
   <div className="user-account-options">
     <div className="share-options">
       <div className="share-link form-group">
@@ -17,12 +17,6 @@ const UserAccountOptionsBlock = ({ mapUrl, userName, onUserLogout }) =>
         Copy
         </button>
       </div>
-      <button
-        className="btn btn-outline-secondary btn-sm"
-        onClick={onUserLogout}
-      >
-      Logout
-      </button>
     </div>
     <div>SocialSharingBar placeholder</div>
   </div>

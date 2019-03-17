@@ -86,7 +86,7 @@ class PlacesVisitedMap extends Component {
 
   render() {
     const { placesLoaded, placemapLoaded } = this.state;
-    const { user, setUser, logoutUser } = this.props;
+    const { user, setUser } = this.props;
     const { places, placesByRegion, statsTotal, placemap } = this;
 
     return (
@@ -108,7 +108,6 @@ class PlacesVisitedMap extends Component {
             statsTotal={statsTotal}
             user={user}
             setUser={setUser}
-            logoutUser={logoutUser}
           />
         }
       </div>
