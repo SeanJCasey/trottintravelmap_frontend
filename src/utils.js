@@ -1,3 +1,6 @@
+export const PATH_BASE = 'http://192.168.0.12:3000';
+export const PATH_MAPS = '/travel-maps';
+
 export function slugifyString(string) {
   return string.replace(/\s+/g, '-').toLowerCase();
 }
