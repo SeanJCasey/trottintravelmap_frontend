@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import { updateRemotePlaceMap } from '../apiRouters';
-import { calculateStatsForPlacesByIDs } from '../utils';
+import { calculateStatsForPlacesByIDs, PATH_BASE, PATH_MAPS } from '../utils';
 
 import FilterablePlaces from './FilterablePlaces';
 import MessagesBlock from '../components/MessagesBlock';
@@ -108,6 +108,7 @@ class EditablePlacesVisitedMap extends Component {
             />
             {user.id &&
               <UserAccountOptionsBlock
+                mapUrl={`${PATH_BASE}${PATH_MAPS}/${user.slug}`}
                 userName={user.name}
                 onUserLogout={this.props.logoutUser}
               />}
