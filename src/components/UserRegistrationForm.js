@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-const UserRegistrationForm = ({ onInputChange, onSubmit }) =>
+const UserRegistrationForm = ({ onInputChange, onSubmit, buttonText = null }) =>
   <form className="user-registration-form" onSubmit={onSubmit}>
     <div className="form-group">
       <input
@@ -33,7 +33,13 @@ const UserRegistrationForm = ({ onInputChange, onSubmit }) =>
         onChange={onInputChange}
       />
     </div>
-    <button type="submit" className="btn btn-success" id="userRegistrationSubmitButton">Save Map</button>
+    <button
+      type="submit"
+      className="btn btn-success"
+      id="userRegistrationSubmitButton"
+    >
+      {buttonText ? buttonText : 'Register'}
+    </button>
   </form>
 
 export default UserRegistrationForm;

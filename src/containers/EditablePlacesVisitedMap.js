@@ -8,7 +8,7 @@ import MessagesBlock from '../components/MessagesBlock';
 import PlaceMapBlock from '../components/PlaceMapBlock';
 import StatBlocksRow from '../components/StatBlocksRow';
 import UserAccountOptionsBlock from '../components/UserAccountOptionsBlock';
-import UserLoginBlock from './UserLoginBlock';
+import MapRegistrationBlock from './MapRegistrationBlock';
 
 
 // TODO: Move stat caculations when we decide state
@@ -124,7 +124,7 @@ class EditablePlacesVisitedMap extends Component {
           </div>
         </div>
         {!user.id &&
-          <UserLoginBlock
+          <MapRegistrationBlock
             addSystemMessage={this.addSystemMessage}
             placesVisited={placesVisited}
             setUser={this.props.setUser}

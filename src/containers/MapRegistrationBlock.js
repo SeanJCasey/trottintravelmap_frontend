@@ -1,16 +1,12 @@
 import React, { Component } from 'react';
-// import { Redirect } from "react-router-dom";
 import axios from 'axios';
 
 import { createRemotePlaceMap, createRemoteUser,
          fetchRemoteUserAuthToken } from '../apiRouters';
-import UserLoginForm from '../components/UserLoginForm';
 import UserRegistrationForm from '../components/UserRegistrationForm';
 
-// const PATH_MAPS = '/travel-maps';
 
-
-class UserLoginBlock extends Component {
+class MapRegistrationBlock extends Component {
   constructor(props) {
     super(props);
 
@@ -20,15 +16,9 @@ class UserLoginBlock extends Component {
         'name': '',
         'password': '',
       },
-      'loginInputs': {
-        'email': '',
-        'password': '',
-      },
     }
 
     // this.handleAPIError = this.handleAPIError.bind(this);
-    this.handleLoginInputChange = this.handleLoginInputChange.bind(this);
-    this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
     this.handleMapRegistrationSubmit = this.handleMapRegistrationSubmit.bind(this);
     this.handleRegistrationInputChange = this.handleRegistrationInputChange.bind(this);
   }
@@ -104,30 +94,6 @@ class UserLoginBlock extends Component {
       .catch(error => console.log(error));
   }
 
-  handleLoginInputChange(event) {
-    this.setState({
-      loginInputs: {
-        ...this.state.loginInputs,
-        [event.target.name]: event.target.value
-      }
-    });
-  }
-
-  handleLoginSubmit(event) {
-    event.preventDefault();
-
-    // this.setState({ messages: { errors: {} } });
-
-    const {email, password} = this.state.loginInputs;
-    fetchRemoteUserAuthToken(email, password)
-      .then(result => {
-        // Set JWT in localStorage
-        localStorage.setItem('jwtToken', result.data.token);
-      })
-      .then(() => this.props.setUser())
-      .catch(error => console.log(error));
-  }
-
   handleRegistrationInputChange(event) {
     this.setState({
       registrationInputs: {
@@ -141,22 +107,12 @@ class UserLoginBlock extends Component {
     return (
       <div className="user-login-wrapper">
         <div className="container">
-          <div className="row">
-            <div className="col-sm-8">
-              <h2>Save this Map</h2>
-              <UserRegistrationForm
-                onSubmit={this.handleMapRegistrationSubmit}
-                onInputChange={this.handleRegistrationInputChange}
-              />
-            </div>
-            <div className="col-sm-4">
-              <h2>Login</h2>
-              <UserLoginForm
-                onSubmit={this.handleLoginSubmit}
-                onInputChange={this.handleLoginInputChange}
-              />
-            </div>
-          </div>
+          <h1>Save this Map</h1>
+          <UserRegistrationForm
+            onSubmit={this.handleMapRegistrationSubmit}
+            onInputChange={this.handleRegistrationInputChange}
+            buttonText='Save Map'
+          />
         </div>
       </div>
     );
@@ -164,4 +120,4 @@ class UserLoginBlock extends Component {
 
 }
 
-export default UserLoginBlock;
+export default MapRegistrationBlock;
