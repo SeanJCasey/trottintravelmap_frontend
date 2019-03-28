@@ -6,6 +6,7 @@ import decode from 'jwt-decode';
 import { fetchRemoteUser } from '../apiRouters';
 import Navbar from '../components/Navbar';
 import PlacesVisitedMap from './PlacesVisitedMap';
+import UserLoginPage from './UserLoginPage';
 
 
 class App extends Component {
@@ -123,6 +124,11 @@ class App extends Component {
                 setUser={this.setUser}
                 editable={false}
               />}
+          />
+          <Route
+            path='/login'
+            exact
+            component={UserLoginPage}
           />
         </div>
       </Router>

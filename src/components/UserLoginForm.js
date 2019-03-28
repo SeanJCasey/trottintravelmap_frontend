@@ -23,7 +23,7 @@ const UserLoginForm = ({ onInputChange, onSubmit }) =>
         onChange={onInputChange}
       />
     </div>
-    <button type="submit" className="btn btn-outline-secondary" id="userLoginSubmitButton">Login</button>
+    <button type="submit" className="btn btn-primary" id="userLoginSubmitButton">Go to My Map</button>
   </form>
 
 export default UserLoginForm;
