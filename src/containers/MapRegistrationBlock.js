@@ -16,27 +16,25 @@ class MapRegistrationBlock extends Component {
         'name': '',
         'password': '',
       },
+      'formErrors': {}
     }
 
-    // this.handleAPIError = this.handleAPIError.bind(this);
+    this.handleFormErrors = this.handleFormErrors.bind(this);
     this.handleMapRegistrationSubmit = this.handleMapRegistrationSubmit.bind(this);
     this.handleRegistrationInputChange = this.handleRegistrationInputChange.bind(this);
   }
 
-  // handleAPIError(result) {
-  //   // Get and copy current errors
-  //   const { errors } = this.state.messages;
-  //   let newErrors = {...errors};
-  //   console.log(result.response);
-  //   Object.keys(result.response.data).forEach(category => {
-  //     const errorMessages = result.response.data[category];
-  //     if (!(category in newErrors)) {
-  //       newErrors[category] = [];
-  //     }
-  //     newErrors[category] = [...newErrors[category], errorMessages];
-  //   });
-  //   this.setState({ messages: { errors: newErrors } });
-  // }
+  handleFormErrors(data) {
+    // Get and copy current errors
+    const formErrors = {};
+    Object.keys(data).forEach(field => {
+      console.log(field);
+      const errorMessages = data[field];
+
+      formErrors[field] = errorMessages;
+    });
+    this.setState({ formErrors });
+  }
 
 
   // Map Registration pipeline:
@@ -56,7 +54,19 @@ class MapRegistrationBlock extends Component {
 
     // Register the user, log them in, and create their placemap
     createRemoteUser(email, name, password)
+      .catch(error => {
+        console.log(error);
+        console.log(error.response);
+
+        // if there is form error data
+        if (error.response.data) {
+          this.handleFormErrors(error.response.data);
+        }
+      })
       .then(result => {
+        // Go ahead and break promise if no result returned.
+        if (!result) return;
+
         const user = result.data;
         this.props.addSystemMessage(
           `Your user account for ${email} has been saved!`,
@@ -104,6 +114,8 @@ class MapRegistrationBlock extends Component {
   }
 
   render() {
+    const { formErrors } = this.state;
+
     return (
       <div className="user-login-wrapper">
         <div className="container">
@@ -112,6 +124,7 @@ class MapRegistrationBlock extends Component {
             onSubmit={this.handleMapRegistrationSubmit}
             onInputChange={this.handleRegistrationInputChange}
             buttonText='Save Map'
+            formErrors={formErrors}
           />
         </div>
       </div>
