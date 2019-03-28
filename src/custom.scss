@@ -6,6 +6,23 @@ body {
   font-size: 14px;
 }
 
+.navbar {
+  .user-links {
+    .account-info {
+      display: inline-block;
+      a {
+        color: $gray-700;;
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+    .logout {
+      margin-left: 10px;
+    }
+  }
+}
+
 .traveler-map {
   .worldmap {
     margin-bottom: 2em;
