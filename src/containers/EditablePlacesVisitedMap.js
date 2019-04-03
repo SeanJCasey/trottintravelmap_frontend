@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 
 import { updateRemotePlaceMap } from '../apiRouters';
-import { calculateStatsForPlacesByIDs, PATH_BASE, PATH_MAPS } from '../utils';
+import { calculateStatsForPlacesByIDs } from '../utils';
+import { APP_URL_BASE, APP_PATH_MAPS } from '../constants';
 
 import FilterablePlaces from './FilterablePlaces';
 import MessagesBlock from '../components/MessagesBlock';
@@ -108,7 +109,7 @@ class EditablePlacesVisitedMap extends Component {
             />
             {user.id &&
               <UserAccountOptionsBlock
-                mapUrl={`${PATH_BASE}${PATH_MAPS}/${user.slug}`}
+                mapUrl={`${APP_URL_BASE}${APP_PATH_MAPS}/${user.slug}`}
                 userName={user.name}
               />}
             <StatBlocksRow
