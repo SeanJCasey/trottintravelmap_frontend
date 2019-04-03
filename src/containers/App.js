@@ -57,6 +57,13 @@ class App extends Component {
           }
         })
         return result.data;
+      })
+      .catch(error => {
+        console.log(error.response);
+        // If something is wrong with JWT token, just remove it for now
+        if (error.response.status === 401) {
+          localStorage.removeItem('jwtToken');
+        }
       });
   }
 
